@@ -49,37 +49,36 @@ npm start
 ```
 Akses aplikasi melalui browser sesuai konfigurasi server.
 ## 🧠 Engineering Notes
-```
+
     Folder node_modules/ tidak disertakan untuk menjaga repository tetap ringan
     Folder data/ di-ignore karena berisi data lokal
     File .env tidak di-commit demi keamanan kredensial
     Struktur commit dibuat clean untuk memudahkan audit dan kolaborasi
-```
+
 ## 🛠️ Tech Stack
-```
+
     Frontend: HTML, CSS, JavaScript
     Backend: Node.js
     Environment Management: dotenv
     Package Manager: npm
-```
+
 ## 🧭 Roadmap
-```
+
     Refactor struktur frontend agar lebih scalable
     Pemisahan backend menjadi API layer
     Penambahan validasi dan error handling
     Deployment ke cloud (Vercel / Railway / Render)
-```
+
 ## 📌 Status Project
-```
+
 🚧 Aktif dikembangkan sebagai project pembelajaran dan portfolio.
 Feedback dan pengembangan lanjutan sangat terbuka.
-```
+
 ## 👤 Author
-```
+
 Dikembangkan oleh difarkry
 GitHub: https://github.com/difarkry
-```
+
 ## 📄 Lisensi
-```
+
 Project ini digunakan untuk keperluan pembelajaran dan pengembangan pribadi.
-```
