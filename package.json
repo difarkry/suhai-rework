@@ -1,0 +1,47 @@
+{
+  "name": "suhaI-dashboard",
+  "version": "1.0.0",
+  "description": "Website cuaca interaktif dengan desain glassmorphism dan AI recommendations",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build process needed for static files'",
+    "test": "echo 'No tests specified'"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "mongoose": "^9.1.4",
+    "nodemon": "^3.1.11",
+    "tailwindcss": "^3.3.0"
+  },
+  "keywords": [
+    "weather",
+    "ai",
+    "glassmorphism",
+    "responsive",
+    "tailwind",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "Weather AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/suhaI-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/suhaI-dashboard/issues"
+  },
+  "homepage": "https://github.com/yourusername/suhaI-dashboard#readme",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
