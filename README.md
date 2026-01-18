@@ -21,7 +21,7 @@ Project ini dikembangkan sebagai **rework mandiri** dengan tujuan meningkatkan s
 - 🧩 Struktur project modular dan mudah dipahami
 
 ## 🗂️ Struktur Project
-
+```
 .
 ├── css/ # Styling dan layout
 ├── js/ # Logic frontend
@@ -31,13 +31,12 @@ Project ini dikembangkan sebagai **rework mandiri** dengan tujuan meningkatkan s
 ├── index.html # Halaman utama
 ├── package.json # Konfigurasi project & dependency
 └── README.md
-
+```
 
 
 ## 🚀 Cara Menjalankan Project
-
-### 1️⃣ Clone repository
-```bash
+```
+1️⃣ Clone repository
 git clone https://github.com/difarkry/suhai-rework.git
 cd suhai-rework
 2️⃣ Install dependency
@@ -47,32 +46,40 @@ cp .env.example .env
 Sesuaikan nilai pada file .env sesuai kebutuhan lokal.
 4️⃣ Jalankan server
 npm start
-
+```
 Akses aplikasi melalui browser sesuai konfigurasi server.
-🧠 Engineering Notes
+## 🧠 Engineering Notes
+```
     Folder node_modules/ tidak disertakan untuk menjaga repository tetap ringan
     Folder data/ di-ignore karena berisi data lokal
     File .env tidak di-commit demi keamanan kredensial
     Struktur commit dibuat clean untuk memudahkan audit dan kolaborasi
-
-🛠️ Tech Stack
+```
+## 🛠️ Tech Stack
+```
     Frontend: HTML, CSS, JavaScript
     Backend: Node.js
     Environment Management: dotenv
     Package Manager: npm
-    
-🧭 Roadmap
+```
+## 🧭 Roadmap
+```
     Refactor struktur frontend agar lebih scalable
     Pemisahan backend menjadi API layer
     Penambahan validasi dan error handling
     Deployment ke cloud (Vercel / Railway / Render)
-📌 Status Project
-
+```
+## 📌 Status Project
+```
 🚧 Aktif dikembangkan sebagai project pembelajaran dan portfolio.
 Feedback dan pengembangan lanjutan sangat terbuka.
-👤 Author
-
+```
+## 👤 Author
+```
 Dikembangkan oleh difarkry
 GitHub: https://github.com/difarkry
-📄 Lisensi
+```
+## 📄 Lisensi
+```
 Project ini digunakan untuk keperluan pembelajaran dan pengembangan pribadi.
+```
