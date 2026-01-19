@@ -1,0 +1,159 @@
+/* --- LAYOUT UTILITIES --- */
+.app-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* --- BENTO GRID SYSTEM --- */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: min-content; /* or specific heights */
+  gap: var(--grid-gap);
+  width: 100%;
+}
+
+/* Grid Spans */
+.col-span-12 {
+  grid-column: span 12;
+}
+.col-span-8 {
+  grid-column: span 8;
+}
+.col-span-6 {
+  grid-column: span 6;
+}
+.col-span-4 {
+  grid-column: span 4;
+}
+.col-span-3 {
+  grid-column: span 3;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+  .col-span-8,
+  .col-span-4,
+  .col-span-6 {
+    grid-column: span 12;
+  }
+  .value-xl {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  .bento-grid {
+    grid-template-columns: 1fr; /* Single column stack */
+    gap: 1rem;
+  }
+  .col-span-3,
+  .col-span-6,
+  .col-span-4,
+  .col-span-8,
+  .col-span-12 {
+    grid-column: span 1;
+  }
+
+  /* Navigation Dock Mobile */
+  .nav-dock {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 24px;
+    justify-content: center;
+  }
+  .nav-brand span {
+    display: none; /* Hide brand text on mobile to save space */
+  }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    background: transparent;
+  }
+  .search-container {
+    flex-grow: 1;
+  }
+  .search-input {
+    width: 100%;
+  }
+  .search-input:focus {
+    width: 100%;
+  }
+
+  /* Typography Scaling */
+  .display-1 {
+    font-size: 4rem !important;
+  }
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+  .w-32 {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+/* --- NAVIGATION COMPONENT (Floating Dock) --- */
+.nav-dock {
+  position: sticky;
+  top: 1rem;
+  z-index: 100;
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  border-radius: 100px; /* Pill shape */
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg-panel);
+  padding: 0.25rem;
+  border-radius: 100px;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+  background: var(--bg-surface);
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}

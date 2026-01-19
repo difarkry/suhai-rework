@@ -1,0 +1,59 @@
+/* --- COLOR PALETTE: DEEP SPACE --- */
+:root {
+  /* Main Backgrounds */
+  --bg-deep: #0f1115; /* Deepest background */
+  --bg-surface: #16181d; /* Card surface */
+  --bg-glass: rgba(22, 24, 29, 0.7); /* Glass surface */
+  --bg-card: rgba(22, 24, 29, 0.6); /* Standard Card Glass */
+
+  /* Accents */
+  --accent-primary: #3b82f6; /* Electric Blue */
+  --accent-glow: rgba(59, 130, 246, 0.4);
+  --accent-text: #60a5fa;
+
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-danger: #ef4444;
+
+  /* Typography */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* Borders & Effects */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(255, 255, 255, 0.15);
+  --glass-blur: blur(20px);
+  --shadow-elevation: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+
+  /* Component Backgrounds */
+  --bg-panel: rgba(255, 255, 255, 0.05);
+  --bg-panel-hover: rgba(255, 255, 255, 0.1);
+
+  /* Bento Grid */
+  --grid-gap: 1.25rem;
+  --card-radius: 1.5rem;
+
+  /* Font Families */
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Transition */
+  --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Mode Overrides */
+:root.light {
+  --bg-deep: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-card: rgba(255, 255, 255, 0.65);
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --shadow-elevation: 0 4px 24px -1px rgba(0, 0, 0, 0.06);
+
+  /* Light Mode Component Backgrounds (Darkened for visibility) */
+  --bg-panel: rgba(0, 0, 0, 0.04);
+  --bg-panel-hover: rgba(0, 0, 0, 0.08);
+}

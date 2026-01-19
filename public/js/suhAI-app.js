@@ -46,11 +46,15 @@ const WeatherApp = {
 
     // 🧠 ML Listeners
     window.addEventListener("ml-comfort-updated", (e) => {
-      const { text, color } = e.detail;
+      const { text, icon, color } = e.detail;
       const el = document.getElementById("comfortLabel");
+      const iconEl = document.getElementById("comfortIcon");
       if (el) {
         el.textContent = text;
         el.className = `text-3xl font-bold transition-colors duration-500 ${color}`;
+      }
+      if (iconEl) {
+        iconEl.textContent = icon || "";
       }
     });
 
@@ -61,6 +65,8 @@ const WeatherApp = {
 
       list.innerHTML = "";
       activities.forEach((act, i) => {
+        if (!act.name) return;
+
         const div = document.createElement("div");
         // Vertical Card Style for Grid
         div.className =
@@ -80,7 +86,7 @@ const WeatherApp = {
             </div>
             <h4 class="font-bold text-gray-200 text-sm h-10 flex items-center justify-center">${act.name}</h4>
             <div class="w-full">
-                <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                <div class="flex justify-between items-center text-[10px] text-gray-400 mb-1 gap-2">
                     <span>Kecocokan</span>
                     <span>${act.score}%</span>
                 </div>
@@ -135,7 +141,6 @@ const WeatherApp = {
   },
 
   async logWeatherData(current, isDay) {
-    console.log("📤 Sending Weather Log...", current);
     try {
       const res = await fetch("/api/log-weather", {
         method: "POST",
@@ -394,7 +399,7 @@ const ChartManager = {
       // Value label on top (Floating)
       const valLbl = document.createElement("div");
       valLbl.className =
-        "absolute -top-6 text-xs font-bold text-white/90 opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1";
+        "absolute -top-6 text-xs font-bold text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-all transform group-hover:-translate-y-1";
       valLbl.textContent = `${val}`;
 
       // Axis Label

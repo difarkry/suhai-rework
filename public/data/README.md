@@ -1,0 +1,1 @@
+Folder ini berisi data lokal dan tidak disertakan di repo. Gunakan data dummy / generate sendiri.

@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuhAI - AI Weather Assistant</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>"
+    />
+  </head>
+  <body>
+    <main class="app-container">
+      <!-- NAVIGATION DOCK -->
+      <nav class="nav-dock">
+        <div class="nav-brand">
+          <div class="icon-box accent">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"
+              />
+              <path
+                d="M12 22a2 2 0 0 1 2-2v-2a2 2 0 0 1-2-2 2 2 0 0 1-2 2v2a2 2 0 0 1 2 2z"
+              />
+              <path
+                d="M22 12a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2 2 2 0 0 1 2-2h2a2 2 0 0 1 2 2z"
+              />
+              <path
+                d="M2 12a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"
+              />
+              <rect x="7" y="7" width="10" height="10" rx="3" />
+            </svg>
+          </div>
+          <span>SuhAI Chat</span>
+        </div>
+
+        <div class="nav-links">
+          <a href="/" class="nav-link">Dashboard</a>
+          <a href="/forecast.html" class="nav-link">Prediksi</a>
+          <a href="/heatmap.html" class="nav-link">Peta Panas</a>
+          <a href="/ai.html" class="nav-link active">Ask AI</a>
+        </div>
+
+        <div class="flex-center gap-2">
+          <button id="themeToggle" class="icon-box" aria-label="Toggle Theme">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      <!-- BENTO GRID LAYOUT -->
+      <div class="bento-grid h-full" style="grid-template-rows: 1fr auto">
+        <!-- CHAT INTERFACE (Main) -->
+        <div
+          class="col-span-12 lg:col-span-8 flex flex-col"
+          style="height: 80vh"
+        >
+          <div
+            class="bento-card no-hover flex-1 flex flex-col min-h-0 relative p-0 overflow-hidden"
+          >
+            <!-- Header (WhatsApp Style) -->
+            <div
+              class="flex-between px-4 py-3 border-b border-white/5 bg-white/5 backdrop-blur-md z-30"
+            >
+              <div class="flex-center gap-4">
+                <div
+                  class="chat-avatar ai"
+                  style="width: 40px; height: 40px; font-size: 1.2rem"
+                >
+                  AI
+                </div>
+                <div>
+                  <h2 class="text-base font-bold leading-tight">Weathera</h2>
+                  <p class="text-xs text-dim">Virtual Assistant • Online</p>
+                </div>
+              </div>
+              <div class="flex-center gap-4 text-dim">
+                <button
+                  id="btnSearch"
+                  class="icon-box w-8 h-8 hover:text-white transition-colors"
+                  aria-label="Search"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </button>
+                <button
+                  class="icon-box w-8 h-8 hover:text-white transition-colors"
+                  aria-label="Menu"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Chat Body (Scrollable) -->
+            <div class="flex-1 min-h-0 relative flex flex-col">
+              <!-- Chat History -->
+              <div
+                id="chatHistory"
+                class="flex-1 overflow-y-auto space-y-4 p-4 custom-scrollbar"
+                style="
+                  background-image: radial-gradient(
+                    circle at center,
+                    rgba(255, 255, 255, 0.03) 1px,
+                    transparent 1px
+                  );
+                  background-size: 20px 20px;
+                "
+              >
+                <!-- Welcome Message -->
+                <div id="welcomeMessage" class="chat-message-row ai">
+                  <div class="chat-avatar ai">AI</div>
+                  <div class="chat-bubble">
+                    Halo! Saya Weathera. Ada yang bisa saya bantu mengenai cuaca
+                    hari ini?
+                    <br /><br />
+                    Coba tanyakan:
+                    <ul class="list-disc ml-4 mt-2 text-dim text-xs">
+                      <li>"Apakah hari ini akan hujan?"</li>
+                      <li>"Saran pakaian untuk cuaca besok?"</li>
+                      <li>"Jelaskan kondisi angin saat ini."</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Area -->
+              <div
+                class="px-4 py-3 border-t border-white/5 bg-white/5 backdrop-blur-md z-30 flex-center gap-2"
+              >
+                <!-- Emoji Picker Popup -->
+                <div id="emojiPicker" class="hidden custom-scrollbar"></div>
+
+                <!-- Emoji Icon -->
+                <button
+                  id="btnEmoji"
+                  class="icon-box w-10 h-10 hover:bg-white/10 transition-colors text-dim"
+                  aria-label="Emoji"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                  </svg>
+                </button>
+
+                <form id="chatForm" class="chat-input-wrapper flex-1 relative">
+                  <input
+                    type="text"
+                    id="chatInput"
+                    class="chat-input-field"
+                    placeholder="Ketik pesan..."
+                    autocomplete="off"
+                    style="
+                      padding-left: 1.5rem;
+                      padding-right: 2rem;
+                      background-color: rgba(255, 255, 255, 0.05);
+                      border: none;
+                    "
+                  />
+                  <!-- Send Button (Blue Plane) -->
+                  <button
+                    type="submit"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex-center rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-lg"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    >
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- SEARCH SIDEBAR (Hidden by default) -->
+            <div id="searchSidebar" class="search-sidebar">
+              <!-- Header -->
+              <div class="search-header">
+                <button
+                  id="btnCloseSearch"
+                  class="hover:text-white text-dim transition-colors"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+                <span class="text-white font-medium">Cari Pesan</span>
+              </div>
+              <!-- Input -->
+              <div class="search-input-area">
+                <div class="relative">
+                  <svg
+                    class="search-icon-overlay"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="search-field"
+                    placeholder="Cari..."
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+              <!-- Results -->
+              <div
+                id="searchResults"
+                class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2 relative"
+              >
+                <!-- Results will be injected here -->
+                <div
+                  id="noResultsMsg"
+                  class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-lg font-medium pointer-events-none"
+                >
+                  Pesan tidak ditemukan
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR: CONTEXT & PROMPTS -->
+        <div class="col-span-12 lg:col-span-4 flex flex-col gap-10">
+          <!-- Context Card -->
+          <div class="bento-card mb-8">
+            <span class="label-sm mb-5">Current Context</span>
+            <div
+              id="aiContext"
+              class="p-4 bg-white/5 rounded-lg text-sm space-y-3"
+            >
+              <div class="flex-between">
+                <span class="text-dim">Location</span>
+                <span class="font-mono text-blue-300" id="ctxCity">--</span>
+              </div>
+              <div class="flex-between">
+                <span class="text-dim">Temp</span>
+                <span class="font-mono text-blue-300" id="ctxTemp">--°C</span>
+              </div>
+              <div class="flex-between">
+                <span class="text-dim">Condition</span>
+                <span class="font-mono text-blue-300" id="ctxCond">--</span>
+              </div>
+            </div>
+            <div class="flex-center gap-2">
+              <div class="icon-box accent">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h1 class="text-2xl font-bold">Chat with Weathera</h1>
+            </div>
+            <p class="text-xs text-dim mt-3 italic">
+              AI uses this live data to answer your questions accurately.
+            </p>
+          </div>
+
+          <!-- Quick Prompts -->
+          <div class="bento-card flex-1">
+            <span class="label-sm mb-3">Quick Prompts</span>
+            <div class="space-y-3">
+              <button class="quick-prompt">☔️ Apakah perlu bawa payung?</button>
+              <button class="quick-prompt">👕 Saran pakaian hari ini</button>
+              <button class="quick-prompt">
+                🚗 Apakah aman untuk bepergian?
+              </button>
+              <button class="quick-prompt">
+                🏥 Apa saran kesehatan hari ini?
+              </button>
+              <button class="quick-prompt">
+                🌬️ Bagaimana kecepatan angin?
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="site-footer mt-auto">
+        <p>&copy; 2026 SuhAI Weather System</p>
+      </footer>
+    </main>
+
+    <!-- MODULES -->
+    <script type="module" src="js/shared.js"></script>
+    <script type="module" src="js/suhAI-data.js"></script>
+    <!-- Backend needed for Context Sync -->
+    <script type="module" src="js/suhAI-backend.js"></script>
+    <script type="module" src="js/suhAI-chat.js"></script>
+  </body>
+</html>

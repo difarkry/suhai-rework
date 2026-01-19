@@ -177,7 +177,10 @@
                 Based on Real-time Sensing
               </p>
             </div>
-            <div class="text-6xl animate-bounce-slow relative z-10">😌</div>
+            <div
+              id="comfortIcon"
+              class="text-6xl animate-bounce-slow relative z-10"
+            ></div>
           </div>
         </div>
 
@@ -201,44 +204,37 @@
         </div>
 
         <!-- STATS ROW -->
-        <div class="bento-card col-span-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="label-sm">Kelembaban</span>
-              <div id="humidity" class="value-lg">65%</div>
-            </div>
-            <div class="icon-box text-accent">💧</div>
+        <!-- STATS ROW -->
+        <div class="bento-card col-span-3 relative">
+          <div>
+            <span class="label-sm">Kelembaban</span>
+            <div id="humidity" class="value-lg">65%</div>
           </div>
+          <div class="icon-box text-accent absolute top-4 right-4">💧</div>
         </div>
 
-        <div class="bento-card col-span-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="label-sm">Angin</span>
-              <div id="windSpeed" class="value-lg">12 km/h</div>
-            </div>
-            <div class="icon-box text-accent">💨</div>
+        <div class="bento-card col-span-3 relative">
+          <div>
+            <span class="label-sm">Angin</span>
+            <div id="windSpeed" class="value-lg">12 km/h</div>
           </div>
+          <div class="icon-box text-accent absolute top-4 right-4">💨</div>
         </div>
 
-        <div class="bento-card col-span-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="label-sm">Tekanan</span>
-              <div id="pressure" class="value-lg">1012 hPa</div>
-            </div>
-            <div class="icon-box text-accent">⏲️</div>
+        <div class="bento-card col-span-3 relative">
+          <div>
+            <span class="label-sm">Tekanan</span>
+            <div id="pressure" class="value-lg">1012 hPa</div>
           </div>
+          <div class="icon-box text-accent absolute top-4 right-4">⏲️</div>
         </div>
 
-        <div class="bento-card col-span-3">
-          <div class="flex items-start justify-between">
-            <div>
-              <span class="label-sm">UV Index</span>
-              <div id="uvIndex" class="value-lg">High</div>
-            </div>
-            <div class="icon-box text-accent">☀️</div>
+        <div class="bento-card col-span-3 relative">
+          <div>
+            <span class="label-sm">UV Index</span>
+            <div id="uvIndex" class="value-lg">High</div>
           </div>
+          <div class="icon-box text-accent absolute top-4 right-4">☀️</div>
         </div>
 
         <!-- ACTION LINKS -->
@@ -308,15 +304,13 @@
 
       <!-- FOOTER -->
       <footer class="site-footer">
-        <p>&copy; 2026 SuhAI Weather System.</p>
+        <p>&copy; 2026 SuhAI Weather System</p>
       </footer>
     </main>
 
     <!-- JavaScript Files -->
     <script type="module" src="js/shared.js"></script>
     <script type="module" src="js/suhAI-data.js"></script>
-    <!-- TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
 
     <!-- App Scripts -->
     <script type="module" src="js/ml-engine.js"></script>
