@@ -138,3 +138,54 @@ a.bento-card {
   background: rgba(59, 130, 246, 0.15);
   color: var(--accent-text);
 }
+
+/* --- FLOATING AI BUTTON --- */
+.floating-ai-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy spring */
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.floating-ai-btn:hover {
+
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+}
+
+.floating-ai-btn:active {
+  transform: scale(0.9);
+}
+
+.floating-ai-tooltip {
+  position: absolute;
+  left: 4rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.floating-ai-btn:hover .floating-ai-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}

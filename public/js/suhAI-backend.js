@@ -12,6 +12,17 @@ class WeatherBackend {
   init() {
     this.setupEventListeners();
     this.loadLastCity();
+    this.startAutoRefresh();
+  }
+
+  startAutoRefresh() {
+    // Refresh every 10 minutes (600,000 ms)
+    setInterval(() => {
+      if (this.currentCity) {
+        console.log("🔄 Auto-refreshing weather data...");
+        this.performSearch(this.currentCity);
+      }
+    }, 600000);
   }
 
   setupEventListeners() {

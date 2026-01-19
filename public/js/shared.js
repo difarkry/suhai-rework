@@ -6,6 +6,27 @@ export const SharedUtils = {
     this.setActiveNavigation();
     this.initSearchFocus();
     this.initSpotlight();
+    this.initFloatingAI();
+  },
+
+  // Floating AI Button Injection (Left Side)
+  initFloatingAI() {
+    // Don't show on the AI page itself (redundant)
+    if (window.location.pathname.includes("ai.html")) return;
+
+    // Check if button already exists (prevent duplicates)
+    if (document.querySelector(".floating-ai-btn")) return;
+
+    const btn = document.createElement("a");
+    btn.href = "/ai.html";
+    btn.className = "floating-ai-btn";
+    btn.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <div class="floating-ai-tooltip">Ask AI</div>
+    `;
+    document.body.appendChild(btn);
   },
 
   // Theme Toggle - Persist across pages
