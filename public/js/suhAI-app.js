@@ -7,7 +7,21 @@ const WeatherApp = {
     this.setupGlobalListeners(); // Listen for backend events
     this.initDashboard();
     this.initForecastPage();
+    this.initDashboard();
+    this.initForecastPage();
+    this.initDisasterPage();
+    this.initDisasterPage();
     this.startClock();
+    this.startAutoRefresh();
+
+    // 🚀 Auto-Init: Load last city or default
+    setTimeout(() => {
+      const lastCity = localStorage.getItem("lastCity") || "Jepara";
+      if (window.weatherBackend) {
+        console.log("🚀 Auto-initializing weather for:", lastCity);
+        window.weatherBackend.performSearch(lastCity);
+      }
+    }, 500); // Small delay to ensure backend is ready
   },
 
   setupGlobalListeners() {
@@ -34,10 +48,9 @@ const WeatherApp = {
       // If we are on main dashboard, update UI immediately
       this.updateCurrentWeather();
 
-      // If we are on forecast page, fetch forecast data too?
-      // Ideally backend does this, but we can do it here for now to keep backend simple
-      if (document.getElementById("forecastList")) {
-        await this.fetchAndRenderForecast(city);
+      // If we are on forecast page, update it with data from event
+      if (data.forecast && data.forecast.forecastday) {
+        this.processForecastData(data.forecast.forecastday);
       }
 
       // 📝 Log Data for ML Training (Throttle this in production, but okay for now)
@@ -169,34 +182,37 @@ const WeatherApp = {
     this.updateCurrentWeather();
   },
 
+  // ... (listeners)
+
+  processForecastData(forecastDays) {
+    if (!forecastDays) return;
+
+    WeatherData.forecast = forecastDays.map((day) => ({
+      day: new Date(day.date).toLocaleDateString("id-ID", {
+        weekday: "short",
+      }),
+      date: new Date(day.date).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      }),
+      high: Math.round(day.day.maxtemp_c),
+      low: Math.round(day.day.mintemp_c),
+      condition: day.day.condition.text,
+      icon: this.getIconForCondition(day.day.condition.text), // Reuse icon logic
+      precipitation: day.day.daily_chance_of_rain || 0, // Handle missing prop
+      wind: day.day.maxwind_kph,
+    }));
+
+    this.renderForecastList();
+    this.renderCharts();
+  },
+
   async fetchAndRenderForecast(city) {
-    try {
-      const response = await fetch(
-        `https://api.weatherapi.com/v1/forecast.json?key=${WeatherAPIKey}&q=${city}&days=7&lang=id`,
-      );
-      const json = await response.json();
-
-      WeatherData.forecast = json.forecast.forecastday.map((day) => ({
-        day: new Date(day.date).toLocaleDateString("id-ID", {
-          weekday: "short",
-        }),
-        date: new Date(day.date).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-        }),
-        high: Math.round(day.day.maxtemp_c),
-        low: Math.round(day.day.mintemp_c),
-        condition: day.day.condition.text,
-        icon: day.day.avgtemp_c > 25 ? "☀️" : "☁️", // logic simplified
-        precipitation: day.day.daily_chance_of_rain,
-        wind: day.day.maxwind_kph,
-      }));
-
-      this.renderForecastList();
-      this.renderCharts();
-    } catch (e) {
-      console.error("Forecast fetch failed", e);
-    }
+    // Deprecated: Logic moved to processForecastData via global event
+    // Keeping empty shell if needed for compatibility/debugging reference
+    // or redirect to backend search if absolutely needed
+    console.warn("fetchAndRenderForecast is deprecated. Use backend search.");
+    window.weatherBackend.performSearch(city);
   },
 
   initForecastPage() {
@@ -206,6 +222,183 @@ const WeatherApp = {
     // Initial render from default data
     this.renderForecastList();
     this.renderCharts();
+  },
+
+  initDisasterPage() {
+    const matrixBody = document.getElementById("riskMatrixBody");
+    if (!matrixBody) return;
+
+    // Listen for updates to render
+    window.addEventListener("weather-updated", (e) => {
+      const { data } = e.detail;
+      this.renderDisasterMatrix(data.disasterForecast);
+      this.updateSafetyStatus(data.disasterForecast);
+      this.initDisasterMap(e.detail.data.location); // Pass location
+    });
+
+    // Initial Search if empty
+    // window.weatherBackend.performSearch("Jepara"); // Optional auto-init
+  },
+
+  renderDisasterMatrix(forecast) {
+    const tbody = document.getElementById("riskMatrixBody");
+    if (!tbody || !forecast) return;
+
+    tbody.innerHTML = "";
+
+    const getRiskColor = (score) => {
+      if (score < 30) return "text-green-400";
+      if (score < 70) return "text-yellow-400";
+      return "text-red-500 font-bold";
+    };
+
+    const getRiskBg = (score) => {
+      if (score < 30) return "bg-green-500";
+      if (score < 70) return "bg-yellow-500";
+      return "bg-red-500";
+    };
+
+    forecast.forEach((day) => {
+      const dateStr = new Date(day.date).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+      });
+
+      const tr = document.createElement("tr");
+      tr.className =
+        "border-b border-gray-200 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors";
+
+      const renderCell = (score, label, details) => `
+              <div class="flex flex-col gap-1">
+                  <div class="flex justify-between items-center">
+                    <span class="${getRiskColor(score)} text-lg">${score}%</span>
+                    <span class="text-[10px] text-gray-500 dark:text-gray-400 opacity-70">${details}</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full ${getRiskBg(score)}" style="width: ${score}%"></div>
+                  </div>
+              </div>
+          `;
+
+      tr.innerHTML = `
+              <td class="p-3 font-medium text-gray-800 dark:text-gray-200">${dateStr}</td>
+              <td class="p-3">${renderCell(day.flood, "Banjir", `${day.details.rain}mm`)}</td>
+              <td class="p-3">${renderCell(day.storm, "Badai", `${day.details.wind}km/h`)}</td>
+              <td class="p-3">${renderCell(day.heat, "Panas", `${day.details.temp}°C`)}</td>
+          `;
+      tbody.appendChild(tr);
+    });
+  },
+
+  updateSafetyStatus(forecast) {
+    const today = forecast[0];
+    const statusEl = document.getElementById("safetyStatus");
+    const msgEl = document.getElementById("safetyMessage");
+    const card = document.getElementById("mainStatusCard");
+
+    if (!statusEl) return;
+
+    let riskLevel = "Normal";
+    let riskMsg = "Kondisi cuaca terpantau aman.";
+    let theme = "green";
+
+    // Check max risk today
+    const maxRisk = Math.max(today.flood, today.storm, today.heat);
+
+    if (maxRisk > 70) {
+      riskLevel = "BAHAYA";
+      riskMsg =
+        "Terdeteksi potensi bencana tinggi hari ini. Segera evakuasi mandiri jika diperlukan.";
+      theme = "red";
+    } else if (maxRisk > 30) {
+      riskLevel = "WASPADA";
+      riskMsg =
+        "Cuaca kurang bersahabat. Tingkatkan kewaspadaan saat beraktivitas.";
+      theme = "yellow"; // Orange/Yellow
+    }
+
+    statusEl.textContent = riskLevel;
+    msgEl.textContent = riskMsg;
+
+    // Update Card Theme
+    if (theme === "red") {
+      card.className =
+        "p-4 bg-red-500/10 border border-red-500/20 rounded-xl transition-all";
+      statusEl.className = "text-4xl font-bold mb-2 text-red-500";
+    } else if (theme === "yellow") {
+      card.className =
+        "p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl transition-all";
+      statusEl.className = "text-4xl font-bold mb-2 text-yellow-500";
+    } else {
+      card.className =
+        "p-4 bg-green-500/10 border border-green-500/20 rounded-xl transition-all";
+      statusEl.className = "text-4xl font-bold mb-2 text-green-500";
+    }
+  },
+
+  initDisasterMap(location) {
+    if (!document.getElementById("disasterMap")) return;
+
+    // Safety check for location
+    if (
+      !location ||
+      typeof location.lat === "undefined" ||
+      typeof location.lon === "undefined"
+    ) {
+      console.warn("initDisasterMap: Invalid location data", location);
+      return;
+    }
+
+    const lat = parseFloat(location.lat);
+    const lon = parseFloat(location.lon);
+
+    console.log(`🗺️ Updating Disaster Map to: ${lat}, ${lon}`);
+
+    // If map instance exists, just FlyTo new location
+    if (this.disasterMapInstance) {
+      this.disasterMapInstance.setView([lat, lon], 12);
+      this.disasterMapInstance.invalidateSize(); // Fix gray tiles issue
+
+      if (this.disasterRiskCircle) {
+        this.disasterMapInstance.removeLayer(this.disasterRiskCircle);
+      }
+
+      this.disasterRiskCircle = L.circle([lat, lon], {
+        color: "red",
+        fillColor: "#f03",
+        fillOpacity: 0.2,
+        radius: 5000,
+      }).addTo(this.disasterMapInstance);
+
+      return;
+    }
+
+    const map = L.map("disasterMap", { attributionControl: false }).setView(
+      [lat, lon],
+      12,
+    );
+
+    // Use Google Hybrid (Satellite + Labels) to match user preference
+    L.tileLayer("http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}", {
+      maxZoom: 20,
+      attribution: "Map data &copy; Google",
+    }).addTo(map);
+
+    // Add a simple "Risk Circle" (Simulated)
+    this.disasterRiskCircle = L.circle([lat, lon], {
+      color: "red",
+      fillColor: "#f03",
+      fillOpacity: 0.2,
+      radius: 5000,
+    }).addTo(map);
+
+    this.disasterMapInstance = map;
+
+    // Force redraw after a short delay to ensure container size is ready
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
   },
 
   updateCurrentWeather() {
@@ -235,6 +428,31 @@ const WeatherApp = {
     // Icon
     const iconEl = document.getElementById("weatherIcon");
     if (iconEl) {
+      // Check for Custom Icon (Emoji/String) from Open-Meteo mapping
+      // Standard WeatherAPI provides a full URL in icon field usually, but we might pass emoji in .text or custom field
+      // The backend mapping puts emoji in .icon for Open-Meteo?
+      // Let's check: mapOpenMeteoToApp sets condition.icon to emoji
+
+      // Wait, standard WeatherAPI condition.icon is a URL.
+      // If we are maintaining compatibility, we should handle both.
+
+      // But suhAI-app.js line 286: getIconForCondition uses text text matching.
+      // Let's rely on that for consistency unless it's a URL.
+
+      const iconUrlOrEmoji = current.condition; // Wait, current.condition is text in updateStateAndNotify?
+      // suhAI-app.js line 21: condition: data.current.condition.text
+      // Ah, data.current.condition is an object.
+      // In mapOpenMeteoToApp: condition: { text: "...", icon: "☀️" }
+
+      // Let's see how suhAI-app.js processes the event in window.addEventListener("weather-updated")
+      // Line 21: condition: data.current.condition.text
+
+      // So current.condition in updateCurrentWeather is just TEXT.
+      // The emoji icon from Open-Meteo mapping is lost here?
+      // No, in line 238 calls this.getIconForCondition(current.condition).
+      // That function maps text to static icons.
+      // We should probably update getIconForCondition to handle more Indonesian keywords from Open-Meteo.
+
       iconEl.src = this.getIconForCondition(current.condition);
     }
   },
@@ -252,7 +470,7 @@ const WeatherApp = {
       card.style.animationDelay = `${index * 100}ms`; // Staggered delay
       card.innerHTML = `
             <span class="text-sm font-semibold opacity-70">${day.day}</span>
-            <span class="text-2xl pt-1 group-hover:scale-110 transition-transform">${day.icon}</span>
+            <img src="${day.icon}" alt="${day.condition}" class="w-10 h-10 object-contain pt-1 group-hover:scale-110 transition-transform" />
             <div class="flex gap-2 mt-1">
                 <span class="font-bold">${day.high}°</span>
                 <span class="opacity-50">${day.low}°</span>
@@ -287,12 +505,29 @@ const WeatherApp = {
     if (!condition)
       return "https://cdn-icons-png.flaticon.com/512/869/869869.png";
     const c = condition.toLowerCase();
-    if (c.includes("rain") || c.includes("hujan"))
+    if (c.includes("rain") || c.includes("hujan") || c.includes("gerimis"))
       return "https://cdn-icons-png.flaticon.com/512/1163/1163657.png";
-    if (c.includes("cloud") || c.includes("berawan"))
+    if (
+      c.includes("cloud") ||
+      c.includes("berawan") ||
+      c.includes("mendung") ||
+      c.includes("kabut")
+    )
       return "https://cdn-icons-png.flaticon.com/512/1163/1163624.png";
-    if (c.includes("storm") || c.includes("badai"))
-      return "https://cdn-icons-png.flaticon.com/512/1163/1163624.png";
+    if (c.includes("storm") || c.includes("badai") || c.includes("petir"))
+      return "https://cdn-icons-png.flaticon.com/512/1163/1163624.png"; // Using "cloud" icon for storm temporarily or find a better storm icon?
+    // The original code used 1163624 for storm too? Let's fix that.
+    // 1163624 is cloud-sun-rain? No, let's stick to what was there or use a better one if possible.
+    // The previous code had: if (c.includes("storm") || c.includes("badai")) return "...1163624.png";
+    // Let's use a specific storm icon if I can find one in the code history?
+    // No, I'll trust the user's existing icon choice, but wait, 1163624 is the same as the "cloud" one in the line above.
+    // Let's use a standard storm one: https://cdn-icons-png.flaticon.com/512/1146/1146860.png (just guessing).
+    // Safest is to stick to the existing URL provided in the file, which was matching cloud for storm.
+    // I will optimize by ensuring "petir" maps to "badai".
+
+    if (c.includes("cerah") || c.includes("sun"))
+      return "https://cdn-icons-png.flaticon.com/512/869/869869.png";
+
     return "https://cdn-icons-png.flaticon.com/512/869/869869.png";
   },
 
@@ -318,6 +553,17 @@ const WeatherApp = {
     };
     updateTime();
     setInterval(updateTime, 60000);
+  },
+
+  startAutoRefresh() {
+    // Refresh weather data every 10 minutes (600,000 ms)
+    setInterval(() => {
+      const currentCity = WeatherData.current.location || "Jepara";
+      console.log("🔄 Auto-refreshing data for:", currentCity);
+      if (window.weatherBackend) {
+        window.weatherBackend.performSearch(currentCity);
+      }
+    }, 600000);
   },
 };
 

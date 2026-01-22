@@ -447,9 +447,9 @@ const ChatApp = {
         uvIndex: data.current.uv,
         visibility: data.current.vis_km,
         pressure: data.current.pressure_mb,
-        isDay: data.current.is_day, // 1 = Day, 0 = Night
-        airQuality: "Baik", // simplistic fallback
-        localTime: data.location.localtime.split(" ")[1], // Extract "HH:MM"
+        isDay: data.current.is_day,
+        airQuality: "Baik",
+        localTime: data.location.localtime.split(" ")[1],
       };
 
       // Update Forecast Data
@@ -465,6 +465,15 @@ const ChatApp = {
           precipitation: d.day.daily_chance_of_rain,
         }));
       }
+
+      // Update Disaster Data
+      if (data.disasterForecast) {
+        WeatherData.disaster = {
+          today: data.disasterForecast[0], // Today's detailed risk
+          alerts: data.alerts || [],
+        };
+      }
+
       this.updateContextDisplay();
     });
   },
@@ -574,7 +583,10 @@ const ChatApp = {
             windSpeed: current.windSpeed,
             humidity: current.humidity,
             feelsLike: current.feelsLike,
-            forecast: forecast ? forecast.slice(0, 3) : [], // Send next 3 days only to save tokens
+            forecast: forecast ? forecast.slice(0, 3) : [],
+            disaster: WeatherData.disaster || null,
+            systemInstruction:
+              "Jika risiko bencana tinggi (>70%), gunakan kata 'Waspada' dan jelaskan risikonya (misal: 'Waspada banjir'). JANGAN gunakan kata 'Tidak Aman'. Berikan saran keselamatan yang relevan.",
           },
         }),
       });

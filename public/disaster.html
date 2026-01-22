@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuhAI Disaster - Early Warning</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      .risk-bar {
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .risk-cell {
+        @apply p-3 border border-white/5 text-center transition-colors hover:bg-white/5;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-container">
+      <!-- NAVIGATION -->
+      <nav class="nav-dock">
+        <div class="nav-brand">
+          <div class="icon-box accent">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
+            </svg>
+          </div>
+          <span>SuhAI</span>
+        </div>
+        <div class="nav-links">
+          <a href="/" class="nav-link">Dashboard</a>
+          <a href="/forecast.html" class="nav-link">Prediksi</a>
+          <a href="/heatmap.html" class="nav-link">Peta Panas</a>
+          <a href="/disaster.html" class="nav-link active">Bencana</a>
+          <a href="/ai.html" class="nav-link">Ask AI</a>
+        </div>
+        <div class="flex-center gap-2">
+          <div class="search-container">
+            <input
+              type="text"
+              id="weatherSearch"
+              class="search-input"
+              placeholder="Cari kota..."
+            />
+          </div>
+        </div>
+      </nav>
+
+      <!-- CONTENT GRID -->
+      <div class="bento-grid">
+        <!-- HEADER -->
+        <div class="bento-card col-span-12">
+          <h1 class="text-3xl font-bold mb-2 text-red-400">
+            Pusat Peringatan Dini
+          </h1>
+          <p class="text-muted">
+            Analisis risiko bencana meteorologi berbasis AI untuk 7 hari
+            kedepan.
+          </p>
+        </div>
+
+        <!-- RISK MATRIX TABLE -->
+        <div class="bento-card col-span-12 lg:col-span-8 overflow-x-auto">
+          <div class="flex-between mb-6">
+            <h3 class="value-lg">Matriks Risiko Mingguan</h3>
+            <div class="flex gap-4 text-xs">
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span> Aman
+                (<30%)
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-yellow-500"></span> Waspada
+                (30-70%)
+              </div>
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span> Bahaya
+                (>70%)
+              </div>
+            </div>
+          </div>
+
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="text-gray-400 border-b border-white/10">
+                <th class="p-3 text-left">Hari/Tanggal</th>
+                <th class="p-3">Banjir 🌊</th>
+                <th class="p-3">Badai 🌪️</th>
+                <th class="p-3">Gelombang Panas 🥵</th>
+              </tr>
+            </thead>
+            <tbody id="riskMatrixBody">
+              <!-- JS will populate -->
+              <tr>
+                <td colspan="4" class="p-8 text-center text-gray-500">
+                  Memuat analisis risiko...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CURRENT STATUS & TIPS -->
+        <div class="bento-card col-span-12 lg:col-span-4 flex flex-col gap-4">
+          <div
+            class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl"
+            id="mainStatusCard"
+          >
+            <h3 class="text-red-400 font-bold mb-1">Status Keamanan</h3>
+            <div class="text-4xl font-bold mb-2" id="safetyStatus">Normal</div>
+            <p class="text-xs text-gray-400" id="safetyMessage">
+              Tidak ada ancaman bencana signifikan terdeteksi saat ini.
+            </p>
+          </div>
+
+          <div
+            class="flex-1 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl"
+          >
+            <h3 class="text-blue-500 dark:text-blue-400 font-bold mb-3">
+              Panduan Keselamatan
+            </h3>
+            <ul
+              class="text-sm space-y-2 text-gray-700 dark:text-gray-300 list-disc pl-4 mb-4"
+              id="safetyTips"
+            >
+              <li>Pantau terus perkembangan cuaca melalui sumber resmi.</li>
+              <li>
+                Siapkan tas siaga (obat, dokumen, senter) jika di zona rawan.
+              </li>
+              <li>Hindari berteduh di bawah pohon saat badai angin kencang.</li>
+              <li>Cabut peralatan elektronik saat terjadi petir hebat.</li>
+            </ul>
+
+            <h4
+              class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 border-t border-gray-200 dark:border-white/10 pt-3"
+            >
+              Nomor Darurat Penting
+            </h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >BNPB</span
+                >
+                <span class="font-mono text-red-500">117</span>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >BASARNAS</span
+                >
+                <span class="font-mono text-orange-500">115</span>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >Polisi</span
+                >
+                <span class="font-mono text-blue-500">110</span>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >Ambulans</span
+                >
+                <span class="font-mono text-green-500">118</span>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >PLN</span
+                >
+                <span class="font-mono text-yellow-500">123</span>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+              >
+                <span class="font-bold text-gray-700 dark:text-gray-300"
+                  >Damkar</span
+                >
+                <span class="font-mono text-red-600">113</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RISK MAP VISUALIZATION -->
+        <div
+          class="bento-card col-span-12 min-h-[400px] p-0 overflow-hidden relative"
+        >
+          <div
+            class="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur px-3 py-1 rounded text-xs font-bold"
+          >
+            Peta Potensi Dampak
+          </div>
+          <div id="disasterMap" class="w-full h-full bg-[#15171B]"></div>
+        </div>
+      </div>
+
+      <footer class="site-footer">
+        <p>&copy; 2026 SuhAI Disaster Response Unit</p>
+      </footer>
+    </main>
+
+    <script type="module" src="js/shared.js"></script>
+    <script type="module" src="js/suhAI-data.js"></script>
+    <script type="module" src="js/suhAI-app.js"></script>
+    <script type="module" src="js/suhAI-backend.js"></script>
+    <script type="module" src="js/suhAI-search.js"></script>
+    <script>
+      // Simple map initialization (placeholder until suhAI-app.js populates it)
+      document.addEventListener("DOMContentLoaded", () => {
+        // Let suhAI-app.js handle init
+      });
+    </script>
+  </body>
+</html>

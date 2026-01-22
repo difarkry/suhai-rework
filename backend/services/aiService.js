@@ -52,6 +52,7 @@ const processChat = async (message, context, sessionId) => {
           const r = await fetch(fetchUrl);
           if (r.ok) {
             const newData = await r.json();
+            startContext.rawWeatherData = newData; // Store raw data for client sync
             // OVERRIDE Context
             startContext.location = newData.location.name;
             startContext.localTime = newData.location.localtime.split(" ")[1];

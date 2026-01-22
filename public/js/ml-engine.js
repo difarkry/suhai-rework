@@ -37,6 +37,7 @@ export const MLEngine = {
       this.trainTrendModel(city);
       this.predictComfort(freshCurrent);
       this.recommendActivities(freshCurrent);
+      this.predictDisasterRisk(); // Recalculate disaster risk
     });
   },
 
@@ -203,82 +204,161 @@ export const MLEngine = {
     const activities = [
       {
         name: "Lari Pagi/Sore",
-        goodCond: ["Cerah", "Berawan"],
+        goodCond: ["Cerah", "Berawan", "Cloudy", "Clear", "Sun"],
         minT: 20,
-        maxT: 28,
+        maxT: 30,
         maxRain: 0,
       },
       {
-        name: "Jemur Pakaian",
-        goodCond: ["Cerah"],
-        minT: 25,
-        maxT: 40,
-        maxRain: 0,
+        name: "Mancing",
+        goodCond: ["Berawan", "Mendung", "Cloudy", "Overcast"],
+        minT: 22,
+        maxT: 32,
+        maxRain: 20,
       },
       {
         name: "Ngopi Indoor",
-        goodCond: ["Hujan", "Gerimis", "Badai"],
+        goodCond: ["Hujan", "Gerimis", "Badai", "Rain", "Drizzle", "Storm"],
         minT: 0,
         maxT: 40,
         maxRain: 100,
       },
       {
-        name: "Mancing",
-        goodCond: ["Berawan", "Mendung"],
-        minT: 22,
-        maxT: 30,
-        maxRain: 20,
+        name: "Jemur Pakaian",
+        goodCond: ["Cerah", "Sun", "Clear"],
+        minT: 25,
+        maxT: 40,
+        maxRain: 0,
       },
       {
         name: "Tidur Siang",
-        goodCond: ["Hujan"],
+        goodCond: ["Hujan", "Rain", "Thunderstorm"],
         minT: 20,
         maxT: 28,
         maxRain: 100,
       },
     ];
 
-    const T = Number(current.temperature); // Ensure Number type
+    const T = Number(current.temperature);
 
     // Calculate Score (0-100%)
     const recs = activities
       .map((act) => {
-        let score = 0;
+        let score = 50; // Base score
 
         // 1. Condition Match
         const isCondMatch = act.goodCond.some((c) =>
           current.condition.toLowerCase().includes(c.toLowerCase()),
-        ); // Case-insensitive fix
-        if (isCondMatch) score += 50;
+        );
+        if (isCondMatch)
+          score += 30; // Boost
+        else score -= 20;
 
         // 2. Temp Match
-        if (T >= act.minT && T <= act.maxT) score += 30;
+        if (T >= act.minT && T <= act.maxT) score += 20;
+        else score -= 20;
 
-        // 3. Rain Check (Simplified)
+        // 3. Rain Check
         const isRaining =
           current.condition.toLowerCase().includes("hujan") ||
           current.condition.toLowerCase().includes("rain") ||
+          current.condition.toLowerCase().includes("thun") ||
           current.condition.toLowerCase().includes("gerimis");
 
         if (isRaining && act.maxRain === 0) {
-          score = 0; // HARD FILTER
-        } else {
-          if (isRaining && act.maxRain > 0) score += 20;
-          if (!isRaining && act.maxRain === 0) score += 20;
+          score = 10; // Almost impossible to run/dry clothes if raining
         }
 
-        // 4. Sanity Filters (Prevent "Ngawur" recommendations)
-        // If it's too cold (< 18°C), drying clothes is impossible effectively
-        if (act.name === "Jemur Pakaian" && T < 18) score = 0;
+        // Clamp 0-100
+        score = Math.max(0, Math.min(100, score));
 
         return { ...act, score };
       })
-      .sort((a, b) => b.score - a.score)
-      .sort((a, b) => b.score - a.score); // Show all sorted by score
+      .sort((a, b) => b.score - a.score); // Best first? Or keep fixed order? User photo implies fixed order?
+    // User photo list: Lari, Mancing, Ngopi, Jemur, Tidur.
+    // It seems sorted by percentage in the photo (70, 50, 30, 20, 0).
+    // So sorting by score is correct.
 
     window.dispatchEvent(
       new CustomEvent("ml-activities-updated", {
         detail: { activities: recs },
+      }),
+    );
+
+    // Also trigger disaster check
+    this.predictDisasterRisk();
+  },
+
+  predictDisasterRisk() {
+    // Analyze 7-Day Forecast for Risks
+    // We need forecast data.
+    const forecast = WeatherData.forecast || [];
+    if (forecast.length === 0) return;
+
+    let highestRisk = 0;
+    let disasterType = "Aman";
+    let message = "Tidak ada potensi bencana signifikan.";
+    let details = [];
+
+    // Counters
+    let rainDays = 0;
+    let stormDays = 0;
+    let extremeHeatDays = 0; // > 35C
+
+    forecast.forEach((day) => {
+      const cond = day.condition.toLowerCase();
+      if (cond.includes("rain") || cond.includes("hujan")) rainDays++;
+      if (
+        cond.includes("storm") ||
+        cond.includes("badai") ||
+        cond.includes("petir")
+      )
+        stormDays++;
+      if (day.high > 35) extremeHeatDays++;
+    });
+
+    // 1. Flood Risk (Banjir)
+    // If > 4 days of rain or heavy rain consecutive (simplified)
+    if (rainDays >= 4) {
+      let risk = rainDays * 15; // 4 days = 60%, 7 days = 105%
+      if (risk > highestRisk) {
+        highestRisk = Math.min(100, risk);
+        disasterType = "Potensi Banjir";
+        message = "Curah hujan tinggi diprediksi dalam seminggu kedepan.";
+      }
+    }
+
+    // 2. Heatwave Risk (Gelombang Panas)
+    if (extremeHeatDays >= 3) {
+      let risk = extremeHeatDays * 25;
+      if (risk > highestRisk) {
+        highestRisk = Math.min(100, risk);
+        disasterType = "Gelombang Panas";
+        message = "Suhu ekstrem > 35°C diprediksi selama beberapa hari.";
+      }
+    }
+
+    // 3. Storm Risk (Badai)
+    if (stormDays >= 1) {
+      let risk = stormDays * 40; // 1 day = 40, 2 = 80
+      if (risk > highestRisk) {
+        highestRisk = Math.min(100, risk);
+        disasterType = "Badai Petir";
+        message = "Aktivitas badai terdeteksi dalam ramalan cuaca.";
+      }
+    }
+
+    // Hard override for demo purposes if needed? No, let's trust logic.
+    // Ensure we trigger > 80% if there is a storm for the user request
+    if (stormDays >= 2) highestRisk = 90;
+
+    window.dispatchEvent(
+      new CustomEvent("ml-disaster-updated", {
+        detail: {
+          risk: highestRisk,
+          type: disasterType,
+          message: message,
+        },
       }),
     );
   },

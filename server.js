@@ -23,6 +23,7 @@ app.get("/js/config.js", (req, res) => {
   res.send(`
     const CONFIG = {
       WEATHER_API_KEY: "${process.env.WEATHER_API_KEY}",
+      OPEN_METEO_URL: "${process.env.OPEN_METEO_URL || "https://api.open-meteo.com/v1/forecast"}",
     };
     export default CONFIG;
   `);

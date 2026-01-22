@@ -114,3 +114,5 @@ build/
 
 # data
 /data/
+
+/verify_limit.js
