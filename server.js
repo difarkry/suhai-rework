@@ -20,6 +20,7 @@ app.use(express.json());
 // Dynamic Config Endpoint (MUST be before static to avoid shadowing)
 app.get("/js/config.js", (req, res) => {
   res.type("application/javascript");
+  res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
   res.send(`
     const CONFIG = {
       WEATHER_API_KEY: "${process.env.WEATHER_API_KEY}",

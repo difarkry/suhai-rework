@@ -133,6 +133,12 @@ a.bento-card {
   justify-content: center;
   background: var(--bg-panel);
   color: var(--text-main);
+  transition: all 0.2s var(--ease-spring);
+  cursor: pointer;
+}
+.icon-box:hover {
+  background: var(--bg-panel-hover);
+  transform: translateY(-2px);
 }
 .icon-box.accent {
   background: rgba(59, 130, 246, 0.15);
@@ -160,7 +166,6 @@ a.bento-card {
 }
 
 .floating-ai-btn:hover {
-
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
 }
 

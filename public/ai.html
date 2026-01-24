@@ -55,10 +55,10 @@
         </div>
 
         <div class="nav-links">
-          <a href="/" class="nav-link">Dashboard</a>
-          <a href="/forecast.html" class="nav-link">Prediksi</a>
-          <a href="/heatmap.html" class="nav-link">Peta Panas</a>
-          <a href="/disaster.html" class="nav-link">Bencana</a>
+          <a href="/#dashboard" class="nav-link">Dashboard</a>
+          <a href="/#forecast" class="nav-link">Prediksi</a>
+          <a href="/#heatmap" class="nav-link">Peta Panas</a>
+          <a href="/#disaster" class="nav-link">Bencana</a>
           <a href="/ai.html" class="nav-link active">Ask AI</a>
         </div>
 
@@ -86,7 +86,7 @@
           style="height: 80vh"
         >
           <div
-            class="bento-card no-hover flex-1 flex flex-col min-h-0 relative p-0 overflow-hidden"
+            class="bento-card no-hover flex-1 flex flex-col min-h-0 relative p-0"
           >
             <!-- Header (WhatsApp Style) -->
             <div
@@ -107,7 +107,7 @@
               <div class="flex-center gap-4 text-dim">
                 <button
                   id="btnSearch"
-                  class="icon-box w-8 h-8 hover:text-white transition-colors"
+                  class="icon-box hover:text-white"
                   aria-label="Search"
                 >
                   <svg
@@ -122,23 +122,254 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                   </svg>
                 </button>
-                <button
-                  class="icon-box w-8 h-8 hover:text-white transition-colors"
-                  aria-label="Menu"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
+                <div class="relative">
+                  <button
+                    id="btnMenu"
+                    class="icon-box hover:text-white"
+                    aria-label="Menu"
                   >
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="12" cy="5" r="1"></circle>
-                    <circle cx="12" cy="19" r="1"></circle>
-                  </svg>
-                </button>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="1"></circle>
+                      <circle cx="12" cy="5" r="1"></circle>
+                      <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                  </button>
+
+                  <!-- Premium Dropdown Menu -->
+                  <div
+                    id="menuDropdown"
+                    class="premium-dropdown-menu hidden absolute top-12 bg-[#0F172A] backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 origin-top-right scale-95 opacity-0"
+                  >
+                    <!-- Header -->
+                    <div class="menu-header">
+                      <h3 class="menu-title">Pengaturan & Fitur</h3>
+                      <p class="menu-subtitle">SuhAI Weathera Assistant</p>
+                    </div>
+
+                    <!-- Menu Grid -->
+                    <div class="menu-grid">
+                      <!-- 1. Tentang Weathera -->
+                      <button id="menuAbout" class="menu-item group">
+                        <div
+                          class="menu-icon-wrapper text-blue-400 group-hover:bg-blue-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Tentang Weathera</span>
+                      </button>
+
+                      <!-- 2. Bantuan -->
+                      <button id="menuHelp" class="menu-item group">
+                        <div
+                          class="menu-icon-wrapper text-purple-400 group-hover:bg-purple-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path
+                              d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                            ></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Bantuan</span>
+                      </button>
+
+                      <div class="menu-separator"></div>
+
+                      <!-- 3. Ganti Gaya Bahasa -->
+                      <button
+                        id="menuPersona"
+                        class="menu-item group hover:bg-white/5"
+                      >
+                        <div
+                          class="menu-icon-wrapper text-yellow-400 group-hover:bg-yellow-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                            ></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Gaya Bahasa</span>
+                        <span id="currentPersonaBadge" class="menu-badge"
+                          >Default</span
+                        >
+                      </button>
+
+                      <!-- 4. Baca Suara (Toggle) -->
+                      <div
+                        id="menuTTSToggle"
+                        class="menu-item group hover:bg-white/5 justify-between cursor-pointer"
+                      >
+                        <div
+                          class="menu-icon-wrapper text-green-400 group-hover:bg-green-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <polygon
+                              points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+                            ></polygon>
+                            <path
+                              d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"
+                            ></path>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Baca Suara</span>
+                        <div id="toggleTTS" class="toggle-switch">
+                          <span class="toggle-knob"></span>
+                        </div>
+                      </div>
+
+                      <!-- 5. Mode Teks Saja (Toggle) -->
+                      <div
+                        id="menuTextOnlyToggle"
+                        class="menu-item group hover:bg-white/5 justify-between cursor-pointer"
+                      >
+                        <div
+                          class="menu-icon-wrapper text-gray-400 group-hover:bg-gray-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                            ></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Mode Teks Saja</span>
+                        <div id="toggleTextOnly" class="toggle-switch">
+                          <span class="toggle-knob"></span>
+                        </div>
+                      </div>
+
+                      <div class="menu-separator"></div>
+
+                      <!-- 6. Laporan Jawaban -->
+                      <button id="menuReport" class="menu-item group">
+                        <div
+                          class="menu-icon-wrapper text-red-500 group-hover:bg-red-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                            ></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Laporan Jawaban</span>
+                      </button>
+
+                      <!-- 7. Ringkasan Harian -->
+                      <button id="menuDailyBrief" class="menu-item group">
+                        <div
+                          class="menu-icon-wrapper text-blue-400 group-hover:bg-blue-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <rect
+                              x="3"
+                              y="4"
+                              width="18"
+                              height="18"
+                              rx="2"
+                              ry="2"
+                            ></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Ringkasan Harian</span>
+                      </button>
+
+                      <!-- 8. Monitor Hujan -->
+                      <button id="menuRainMonitor" class="menu-item group">
+                        <div
+                          class="menu-icon-wrapper text-cyan-400 group-hover:bg-cyan-500/20"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <line x1="16" y1="13" x2="16" y2="21"></line>
+                            <line x1="8" y1="13" x2="8" y2="21"></line>
+                            <line x1="12" y1="15" x2="12" y2="23"></line>
+                            <path
+                              d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"
+                            ></path>
+                          </svg>
+                        </div>
+                        <span class="menu-label">Monitor Hujan</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -184,7 +415,7 @@
                 <!-- Emoji Icon -->
                 <button
                   id="btnEmoji"
-                  class="icon-box w-10 h-10 hover:bg-white/10 transition-colors text-dim"
+                  class="icon-box text-dim"
                   aria-label="Emoji"
                 >
                   <svg
@@ -241,9 +472,10 @@
             <div id="searchSidebar" class="search-sidebar">
               <!-- Header -->
               <div class="search-header">
+                <h3 class="search-title">Pencarian</h3>
                 <button
                   id="btnCloseSearch"
-                  class="hover:text-white text-dim transition-colors"
+                  class="hover:text-blue-500 text-dim transition-colors p-1"
                 >
                   <svg
                     width="20"
@@ -251,13 +483,12 @@
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    stroke-width="2.5"
                   >
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
                 </button>
-                <span class="text-white font-medium">Cari Pesan</span>
               </div>
               <!-- Input -->
               <div class="search-input-area">
@@ -368,7 +599,222 @@
       <footer class="site-footer mt-auto">
         <p>&copy; 2026 SuhAI Weather System</p>
       </footer>
+
+      <!-- MODALS -->
+      <!-- About Modal -->
+
+      <!-- Help Modal -->
     </main>
+
+    <!-- MODALS (Moved outside main to fix positioning) -->
+    <div
+      id="modalAbout_v2"
+      class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] opacity-0 transition-opacity duration-300"
+      style="display: none"
+    >
+      <div class="modal-centering-wrapper">
+        <div class="modal-card">
+          <!-- Gradient Border Effect -->
+          <div
+            class="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20 opacity-50 pointer-events-none"
+          ></div>
+
+          <!-- Close Button X - Top Right -->
+          <button
+            class="absolute top-6 right-6 z-20 text-gray-400 hover:text-white transition-all hover:rotate-90 hover:scale-110 p-2 rounded-full hover:bg-white/10 btn-close-modal group"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="modal-content-center relative z-10">
+            <!-- Title Section -->
+            <div class="modal-title">
+              <span class="modal-title-gradient about-title-gradient">
+                Tentang Weathera
+              </span>
+            </div>
+
+            <!-- Subtitle Badge -->
+            <div class="modal-subtitle-badge-wrapper">
+              <div
+                class="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 backdrop-blur-sm"
+              >
+                <span
+                  class="text-xs font-semibold text-blue-300 tracking-wider"
+                >
+                  AI WEATHER ASSISTANT
+                </span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p
+              class="text-sm text-dim mb-10 leading-relaxed max-w-[90%] mx-auto"
+            >
+              Weathera adalah asisten AI cerdas yang didukung oleh data cuaca
+              <span
+                class="font-semibold text-blue-500 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20"
+              >
+                real-time
+              </span>
+              dari Open-Meteo. Didesain untuk memberikan rekomendasi aktivitas,
+              peringatan bencana, dan teman ngobrol yang asik.
+            </p>
+
+            <!-- Footer Info -->
+            <div class="modal-footer">
+              <div
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-400/30 backdrop-blur-sm shadow-lg shadow-blue-500/10"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"
+                  ></span>
+                  <span class="font-bold text-blue-300">v2.5.0</span>
+                  <span
+                    class="text-blue-400/60 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-500/20"
+                  >
+                    BETA
+                  </span>
+                </div>
+              </div>
+              <div
+                class="w-px h-6 bg-gradient-to-b from-transparent via-white/20 to-transparent"
+              ></div>
+              <div
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-400/30 backdrop-blur-sm shadow-lg shadow-purple-500/10"
+              >
+                <div class="flex items-center gap-2">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="text-purple-400"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span class="font-semibold text-purple-300">SuhAI Team</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="modalHelp"
+      class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] opacity-0 transition-opacity duration-300"
+      style="display: none"
+    >
+      <div class="modal-centering-wrapper">
+        <div class="modal-card">
+          <!-- Close Button X - Top Right -->
+          <button
+            class="absolute top-6 right-6 z-20 text-gray-400 hover:text-white transition-all hover:rotate-90 hover:scale-110 p-2 rounded-full hover:bg-white/10 btn-close-modal group"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <div class="modal-content-center relative z-10">
+            <!-- Title Section -->
+            <div class="modal-title">
+              <span class="modal-title-gradient help-title-gradient">
+                Pusat Bantuan
+              </span>
+            </div>
+            <div
+              class="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6"
+            ></div>
+
+            <div class="space-y-3 text-sm text-dim w-full text-left">
+              <div
+                class="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-default group"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="text-2xl flex-shrink-0 mt-0.5">🎭</div>
+                  <div class="flex-1">
+                    <h4
+                      class="font-bold text-main mb-1.5 group-hover:text-purple-300 transition-colors"
+                    >
+                      Ganti Gaya Bahasa
+                    </h4>
+                    <p class="text-xs text-muted leading-relaxed">
+                      Ubah kepribadian AI menjadi Formal, Santai, atau lainnya
+                      sesuai mood kamu.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-default group"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="text-2xl flex-shrink-0 mt-0.5">🔊</div>
+                  <div class="flex-1">
+                    <h4
+                      class="font-bold text-main mb-1.5 group-hover:text-purple-300 transition-colors"
+                    >
+                      Baca Suara
+                    </h4>
+                    <p class="text-xs text-muted leading-relaxed">
+                      Aktifkan fitur ini agar AI membacakan balasannya secara
+                      otomatis (Text-to-Speech).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-default group"
+              >
+                <div class="flex items-start gap-4">
+                  <div class="text-2xl flex-shrink-0 mt-0.5">🌧️</div>
+                  <div class="flex-1">
+                    <h4
+                      class="font-bold text-main mb-1.5 group-hover:text-purple-300 transition-colors"
+                    >
+                      Monitor Hujan
+                    </h4>
+                    <p class="text-xs text-muted leading-relaxed">
+                      Dapatkan analisis cepat tentang potensi hujan dalam 3 jam
+                      ke depan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- MODULES -->
     <script type="module" src="js/shared.js"></script>

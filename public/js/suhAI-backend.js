@@ -16,13 +16,13 @@ class WeatherBackend {
   }
 
   startAutoRefresh() {
-    // Refresh every 10 minutes (600,000 ms)
+    // Refresh every 5 minutes (300,000 ms)
     setInterval(() => {
       if (this.currentCity) {
         console.log("🔄 Auto-refreshing weather data...");
         this.performSearch(this.currentCity);
       }
-    }, 600000);
+    }, 300000);
   }
 
   setupEventListeners() {
@@ -94,7 +94,7 @@ class WeatherBackend {
     // 2. Weather Fetch
     // We need: current temp, condition, wind, humidity, pressure, daily max/min/precip
 
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,wind_speed_10m_max,precipitation_probability_max&timezone=auto&forecast_days=7`;
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m&hourly=uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,wind_speed_10m_max,precipitation_probability_max&timezone=auto&forecast_days=7`;
 
     const res = await fetch(weatherUrl);
     if (!res.ok) throw new Error("Open-Meteo Forecast Failed");
@@ -107,6 +107,7 @@ class WeatherBackend {
   mapOpenMeteoToApp(om, cityName, country) {
     const current = om.current;
     const daily = om.daily;
+    const hourly = om.hourly;
 
     // Helper: WMO Code to Text & Icon
     const decodeWMO = (code, isDay = 1) => {
@@ -132,6 +133,20 @@ class WeatherBackend {
 
     const condParam = decodeWMO(current.weather_code, current.is_day);
 
+    // Calculate current UV from hourly data
+    // Open-Meteo hourly time is ISO8601, we find the closest hour to current time
+    let currentUV = 0;
+    if (hourly && hourly.time && hourly.uv_index) {
+      const nowStr = current.time.substring(0, 13); // Match YYYY-MM-DDTHH
+      const index = hourly.time.findIndex((t) => t.startsWith(nowStr));
+      if (index !== -1) {
+        currentUV = hourly.uv_index[index];
+      } else {
+        // Fallback: If not found, use index 0 if close or just 0
+        currentUV = 0;
+      }
+    }
+
     return {
       location: {
         name: cityName,
@@ -152,8 +167,8 @@ class WeatherBackend {
         pressure_mb: current.pressure_msl,
         humidity: current.relative_humidity_2m,
         vis_km: 10, // Def
-        uv: 5, // Def
-        feelslike_c: current.temperature_2m, // Approx
+        uv: currentUV, // Real Hourly UV
+        feelslike_c: current.apparent_temperature, // NOW REAL
       },
       forecast: {
         forecastday: daily.time.map((t, i) => {

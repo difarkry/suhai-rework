@@ -12,7 +12,6 @@ const WeatherApp = {
     this.initDisasterPage();
     this.initDisasterPage();
     this.startClock();
-    this.startAutoRefresh();
 
     // 🚀 Auto-Init: Load last city or default
     setTimeout(() => {
@@ -83,7 +82,7 @@ const WeatherApp = {
         const div = document.createElement("div");
         // Vertical Card Style for Grid
         div.className =
-          "flex flex-col items-center justify-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-default border border-white/5 group animate-enter text-center gap-2";
+          "flex flex-col items-center justify-center p-4 rounded-xl bg-white/50 dark:bg-white/5 hover:bg-white/10 transition-all cursor-default border border-gray-200 dark:border-white/5 group animate-enter text-center gap-2 shadow-sm dark:shadow-none";
         div.style.animationDelay = `${i * 100}ms`;
 
         let icon = "🎯";
@@ -94,17 +93,17 @@ const WeatherApp = {
         if (act.name.includes("Tidur")) icon = "😴";
 
         div.innerHTML = `
-            <div class="w-12 h-12 rounded-full bg-black/20 flex items-center justify-center text-2xl mb-1 group-hover:scale-110 transition-transform">
+            <div class="w-12 h-12 rounded-full bg-black/10 dark:bg-black/20 flex items-center justify-center text-2xl mb-1 group-hover:scale-110 transition-transform">
                 ${icon}
             </div>
-            <h4 class="font-bold text-gray-200 text-sm h-10 flex items-center justify-center">${act.name}</h4>
+            <h4 class="font-bold text-gray-800 dark:text-gray-200 text-sm h-10 flex items-center justify-center">${act.name}</h4>
             <div class="w-full">
-                <div class="flex justify-between items-center text-[10px] text-gray-400 mb-1 gap-2">
+                <div class="flex justify-between items-center text-[10px] text-gray-600 dark:text-gray-400 mb-1 gap-2">
                     <span>Kecocokan</span>
                     <span>${act.score}%</span>
                 </div>
-                <div class="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-400" style="width: ${act.score}%"></div>
+                <div class="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 dark:bg-blue-400" style="width: ${act.score}%"></div>
                 </div>
             </div>
         `;
@@ -469,13 +468,19 @@ const WeatherApp = {
         "glassmorphism-card p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-colors cursor-pointer group animate-enter";
       card.style.animationDelay = `${index * 100}ms`; // Staggered delay
       card.innerHTML = `
-            <span class="text-sm font-semibold opacity-70">${day.day}</span>
-            <img src="${day.icon}" alt="${day.condition}" class="w-10 h-10 object-contain pt-1 group-hover:scale-110 transition-transform" />
-            <div class="flex gap-2 mt-1">
-                <span class="font-bold">${day.high}°</span>
-                <span class="opacity-50">${day.low}°</span>
+            <span class="text-xs font-bold tracking-wider text-dim mb-1">${day.day}</span>
+            <img src="${day.icon}" alt="${day.condition}" class="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+            <div class="flex gap-4 mt-2">
+                <div class="flex flex-col items-center">
+                    <span class="text-sm font-bold text-main">${day.high}°</span>
+                    <span class="text-[9px] text-muted uppercase font-semibold">Maks</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-sm font-medium text-muted">${day.low}°</span>
+                    <span class="text-[9px] text-dim uppercase font-semibold">Min</span>
+                </div>
             </div>
-            <span class="text-xs text-blue-400 mt-1">${day.precipitation}% Rain</span>
+            <span class="text-[10px] font-semibold text-blue-400/80 mt-2">${day.precipitation}% Rain</span>
         `;
       list.appendChild(card);
     });
@@ -554,17 +559,6 @@ const WeatherApp = {
     updateTime();
     setInterval(updateTime, 60000);
   },
-
-  startAutoRefresh() {
-    // Refresh weather data every 10 minutes (600,000 ms)
-    setInterval(() => {
-      const currentCity = WeatherData.current.location || "Jepara";
-      console.log("🔄 Auto-refreshing data for:", currentCity);
-      if (window.weatherBackend) {
-        window.weatherBackend.performSearch(currentCity);
-      }
-    }, 600000);
-  },
 };
 
 // Simple Chart Manager built-in (replacing external lib requirement for simplicity and performance)
@@ -581,9 +575,12 @@ const ChartManager = {
     let min = Math.min(...data);
 
     // Add padding to scales so bars aren't maxed out or zeroed out completely
-    // If variability is low, use a tighter range to show differences
     const range = max - min;
-    const padding = range === 0 ? 5 : range * 0.2; // 20% padding
+    const isTemperature = containerId.toLowerCase().includes("temperature");
+
+    // For temperature, use a wider min-padding (at least 6 degrees) to prevent visual exaggeration
+    const minPadding = isTemperature ? 6 : range === 0 ? 5 : range * 0.2;
+    const padding = Math.max(minPadding, range * 0.2);
 
     // Prevent min from being negative unless data is negative (weather usually positive here)
     let yMax = Math.ceil(max + padding);
@@ -651,7 +648,7 @@ const ChartManager = {
       // Axis Label
       const axisLbl = document.createElement("span");
       axisLbl.className =
-        "text-[10px] uppercase font-bold text-gray-500 mt-2 truncate w-full text-center tracking-wider";
+        "text-[10px] font-bold text-gray-500 mt-2 truncate w-full text-center tracking-wider";
       axisLbl.textContent = l;
 
       barWrapper.appendChild(valLbl);

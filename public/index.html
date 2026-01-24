@@ -30,14 +30,31 @@
       crossorigin=""
     ></script>
 
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: "class" };
+    </script>
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      /* SPA Helper Classes */
+      .page-view {
+        transition: opacity 0.3s ease-in-out;
+      }
+      .page-view.hidden {
+        display: none !important;
+        opacity: 0;
+      }
+      /* Ensure Heatmap container fills space correctly in SPA mode */
+      #view-heatmap {
+        height: calc(100vh - 100px);
+      }
+    </style>
 
     <!-- Favicon -->
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>"
-    />
+    <link rel="icon" href="./image/logo.png" />
   </head>
   <body>
     <main class="app-container">
@@ -62,10 +79,30 @@
         </div>
 
         <div class="nav-links">
-          <a href="/" class="nav-link active">Dashboard</a>
-          <a href="/forecast.html" class="nav-link">Prediksi</a>
-          <a href="/heatmap.html" class="nav-link">Peta Panas</a>
-          <a href="/disaster.html" class="nav-link">Bencana</a>
+          <a
+            href="#"
+            class="nav-link active"
+            onclick="switchPage(event, 'view-dashboard')"
+            >Dashboard</a
+          >
+          <a
+            href="#"
+            class="nav-link"
+            onclick="switchPage(event, 'view-forecast')"
+            >Prediksi</a
+          >
+          <a
+            href="#"
+            class="nav-link"
+            onclick="switchPage(event, 'view-heatmap')"
+            >Peta Panas</a
+          >
+          <a
+            href="#"
+            class="nav-link"
+            onclick="switchPage(event, 'view-disaster')"
+            >Bencana</a
+          >
           <a href="/ai.html" class="nav-link">Ask AI</a>
         </div>
 
@@ -97,211 +134,486 @@
         </div>
       </nav>
 
-      <!-- BENTO GRID LAYOUT -->
-      <div class="bento-grid">
-        <!-- HERO CARD: MAIN WEATHER -->
-        <div class="bento-card col-span-12">
-          <div class="flex-between mb-4">
-            <div>
-              <span class="label-sm">Kondisi Saat Ini</span>
-              <h2 id="cityName" class="text-3xl font-bold text-gradient">
-                Jepara, ID
-              </h2>
-              <p id="weatherDesc" class="text-muted mt-2">Sebagian Berawan</p>
+      <!-- VIEW: DASHBOARD (Default) -->
+      <section id="view-dashboard" class="page-view relative z-10">
+        <div class="bento-grid">
+          <!-- HERO CARD: MAIN WEATHER -->
+          <div class="bento-card col-span-12">
+            <div class="flex-between mb-4">
+              <div>
+                <span class="label-sm">Suhu Saat Ini</span>
+                <h2 id="cityName" class="text-3xl font-bold text-gradient">
+                  Jepara, ID
+                </h2>
+                <p id="weatherDesc" class="text-muted mt-2">Sebagian Berawan</p>
+              </div>
+              <div class="text-right">
+                <div id="clock" class="text-xl font-mono text-dim">
+                  12:00 WIB
+                </div>
+                <div id="date" class="text-sm text-muted">
+                  Jumat, 17 Jan 2026
+                </div>
+              </div>
             </div>
-            <div class="text-right">
-              <div id="clock" class="text-xl font-mono text-dim">12:00 WIB</div>
-              <div id="date" class="text-sm text-muted">Jumat, 17 Jan 2026</div>
+
+            <div
+              class="flex flex-row items-center justify-center gap-40 text-center mt-6 relative"
+              style="
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 25rem !important;
+              "
+            >
+              <div class="ambient-glow"></div>
+              <img
+                id="weatherIcon"
+                src=""
+                alt=""
+                class="w-48 h-48 filter drop-shadow-2xl animate-pulse-slow relative z-10"
+              />
+              <div class="flex flex-col items-center relative z-10">
+                <span
+                  id="temperature"
+                  class="text-gradient display-1 leading-none"
+                  style="font-size: 12rem"
+                  >28°</span
+                >
+                <div class="mt-2">
+                  <p class="text-xl text-muted">
+                    Terasa
+                    <span id="feelsLike" class="font-bold text-mode">30°C</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- AI Comfort Index (New) -->
+          <!-- AI Comfort Index -->
+          <div
+            class="bento-card col-span-12 md:col-span-5 relative overflow-hidden group flex flex-col justify-center"
+          >
+            <div
+              class="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"
+            ></div>
+            <h3
+              class="text-gray-600 dark:text-gray-400 font-medium mb-1 flex items-center gap-2"
+            >
+              <span class="w-2 h-2 rounded-full bg-purple-400"></span> Comfort
+              Index (AI)
+            </h3>
+            <div class="flex items-center justify-between mt-4">
+              <div class="relative z-10">
+                <span
+                  id="comfortLabel"
+                  class="text-4xl font-bold text-gray-800 dark:text-white transition-colors duration-500"
+                  >Menganalisa... 🤖</span
+                >
+                <div
+                  class="h-1 w-full bg-gray-700/50 rounded-full mt-3 overflow-hidden backdrop-blur-sm"
+                >
+                  <div
+                    id="comfortBar"
+                    class="h-full bg-gray-500 w-1/2 transition-all duration-1000"
+                  ></div>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Based on Real-time Sensing
+                </p>
+              </div>
+              <div
+                id="comfortIcon"
+                class="text-6xl animate-bounce-slow relative z-10"
+              ></div>
             </div>
           </div>
 
-          <div
-            class="flex flex-row items-center justify-center gap-40 text-center mt-6 relative"
-            style="
-              display: flex !important;
-              flex-direction: row !important;
-              align-items: center !important;
-              gap: 25rem !important;
-            "
-          >
-            <div class="ambient-glow"></div>
-            <img
-              id="weatherIcon"
-              src=""
-              alt=""
-              class="w-48 h-48 filter drop-shadow-2xl animate-pulse-slow relative z-10"
-            />
-            <div class="flex flex-col items-center relative z-10">
-              <span
-                id="temperature"
-                class="text-gradient display-1 leading-none"
-                style="font-size: 12rem"
-                >28°</span
+          <!-- Activity Recommendations -->
+          <div class="bento-card col-span-12 md:col-span-7 flex flex-col">
+            <h3
+              class="text-gray-600 dark:text-gray-400 font-medium mb-4 flex items-center gap-2"
+            >
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> Rekomendasi
+              Aktivitas (AI)
+            </h3>
+            <div
+              id="activityList"
+              class="grid grid-cols-1 md:grid-cols-3 gap-3 h-full"
+            >
+              <!-- Activities will be injected here -->
+              <div
+                class="col-span-3 text-center text-gray-500 italic p-4 flex items-center justify-center"
               >
-              <div class="mt-2">
-                <p class="text-xl text-muted">
-                  Terasa
-                  <span id="feelsLike" class="font-bold text-mode">30°C</span>
-                </p>
+                Menunggu analisis AI...
               </div>
             </div>
           </div>
+
+          <!-- STATS ROW -->
+          <!-- STATS ROW -->
+          <div class="bento-card col-span-3 relative">
+            <div>
+              <span class="label-sm">Kelembaban</span>
+              <div id="humidity" class="value-lg">65%</div>
+            </div>
+            <div class="icon-box text-accent absolute top-4 right-4">💧</div>
+          </div>
+
+          <div class="bento-card col-span-3 relative">
+            <div>
+              <span class="label-sm">Angin</span>
+              <div id="windSpeed" class="value-lg">12 km/h</div>
+            </div>
+            <div class="icon-box text-accent absolute top-4 right-4">💨</div>
+          </div>
+
+          <div class="bento-card col-span-3 relative">
+            <div>
+              <span class="label-sm">Tekanan</span>
+              <div id="pressure" class="value-lg">1012 hPa</div>
+            </div>
+            <div class="icon-box text-accent absolute top-4 right-4">⏲️</div>
+          </div>
+
+          <div class="bento-card col-span-3 relative">
+            <div>
+              <span class="label-sm">UV Index</span>
+              <div id="uvIndex" class="value-lg">High</div>
+            </div>
+            <div class="icon-box text-accent absolute top-4 right-4">☀️</div>
+          </div>
+
+          <!-- ACTION LINKS -->
+          <!-- ACTION LINKS -->
+          <a
+            href="#"
+            onclick="switchPage(event, 'view-forecast')"
+            class="bento-card col-span-6 group cursor-pointer hover:border-accent-primary/50 transition-colors"
+          >
+            <div class="flex-between">
+              <span class="label-sm group-hover:text-accent transition-colors"
+                >7-Day Forecast</span
+              >
+              <svg
+                class="w-6 h-6 text-muted group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                ></path>
+              </svg>
+            </div>
+            <h3
+              class="text-xl mt-4 font-bold group-hover:text-accent transition-colors"
+            >
+              Lihat Prediksi
+            </h3>
+            <p class="text-sm text-dim mt-1">Analisis tren cuaca lengkap.</p>
+          </a>
+
+          <a
+            href="#"
+            onclick="switchPage(event, 'view-heatmap')"
+            class="bento-card col-span-6 group cursor-pointer hover:border-accent-primary/50 transition-colors"
+          >
+            <div class="flex-between">
+              <span class="label-sm group-hover:text-accent transition-colors"
+                >Interactive Map</span
+              >
+              <svg
+                class="w-6 h-6 text-muted group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                ></path>
+              </svg>
+            </div>
+            <h3
+              class="text-xl mt-4 font-bold group-hover:text-accent transition-colors"
+            >
+              Buka Peta Panas
+            </h3>
+            <p class="text-sm text-dim mt-1">
+              Visualisasi zona panas interaktif.
+            </p>
+          </a>
         </div>
-        <!-- AI Comfort Index (New) -->
-        <!-- AI Comfort Index -->
-        <div
-          class="bento-card col-span-12 md:col-span-5 relative overflow-hidden group flex flex-col justify-center"
-        >
-          <div
-            class="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"
-          ></div>
-          <h3 class="text-gray-400 font-medium mb-1 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-purple-400"></span> Comfort
-            Index (AI)
-          </h3>
-          <div class="flex items-center justify-between mt-4">
-            <div class="relative z-10">
-              <span
-                id="comfortLabel"
-                class="text-4xl font-bold text-white transition-colors duration-500"
-                >Menganalisa... 🤖</span
-              >
-              <div
-                class="h-1 w-full bg-gray-700/50 rounded-full mt-3 overflow-hidden backdrop-blur-sm"
-              >
-                <div
-                  id="comfortBar"
-                  class="h-full bg-gray-500 w-1/2 transition-all duration-1000"
-                ></div>
-              </div>
-              <p class="text-sm text-gray-400 mt-2">
-                Based on Real-time Sensing
-              </p>
+      </section>
+
+      <!-- VIEW: FORECAST -->
+      <section id="view-forecast" class="page-view hidden relative z-10">
+        <div class="bento-grid">
+          <div class="bento-card col-span-12">
+            <h1 class="text-3xl font-bold mb-2">Prediksi 7 Hari</h1>
+            <p class="text-muted">
+              Analisis tren cuaca lanjutan untuk wilayah terpilih.
+            </p>
+          </div>
+
+          <!-- CHARTS -->
+          <div class="bento-card col-span-12 lg:col-span-8">
+            <div class="flex-between mb-4">
+              <h3 class="value-lg">Tren Suhu</h3>
+              <div class="icon-box">📈</div>
             </div>
             <div
-              id="comfortIcon"
-              class="text-6xl animate-bounce-slow relative z-10"
+              id="temperatureChart"
+              class="chart-container"
+              style="height: 300px"
+            ></div>
+          </div>
+
+          <div class="bento-card col-span-12 lg:col-span-4">
+            <div class="flex-between mb-4">
+              <h3 class="value-lg">Presipitasi</h3>
+              <div class="icon-box">🌧️</div>
+            </div>
+            <div
+              id="precipitationChart"
+              class="chart-container"
+              style="height: 300px"
+            ></div>
+          </div>
+
+          <div class="bento-card col-span-12">
+            <div class="flex-between mb-6">
+              <h3 class="value-lg">Jadwal Mingguan</h3>
+              <div class="icon-box">📅</div>
+            </div>
+            <div
+              id="forecastList"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              <!-- JS will populate this -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: HEATMAP -->
+      <section id="view-heatmap" class="page-view hidden relative z-10">
+        <div class="bento-grid h-full" style="height: 100%">
+          <!-- CONTROLS -->
+          <div
+            class="bento-card col-span-12 lg:col-span-3 flex flex-col gap-6 overflow-y-auto"
+          >
+            <div>
+              <span class="label-sm">Kontrol Peta</span>
+              <h2 class="text-xl font-bold">Visualisasi Area</h2>
+            </div>
+
+            <div>
+              <label class="label-sm"
+                >Filter Suhu (> <span id="tempFilterValue">28°</span>)</label
+              >
+              <input
+                type="range"
+                min="20"
+                max="40"
+                value="28"
+                class="w-full h-2 bg-panel-hover rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </div>
+
+            <div class="p-4 bg-panel rounded-xl border border-adaptive">
+              <h4 class="font-bold mb-2">Legenda</h4>
+              <div class="flex items-center gap-2 text-xs text-muted">
+                <span class="w-3 h-3 rounded-full bg-green-500"></span> Sejuk
+                <span class="w-3 h-3 rounded-full bg-yellow-500"></span> Normal
+                <span class="w-3 h-3 rounded-full bg-red-500"></span> Panas
+              </div>
+            </div>
+          </div>
+
+          <!-- MAP CONTAINER -->
+          <div
+            class="bento-card col-span-12 lg:col-span-9 p-0 overflow-hidden relative min-h-[50vh]"
+          >
+            <div
+              id="heatmapMap"
+              style="
+                width: 100%;
+                height: 100%;
+                min-height: 400px;
+                background: #0f1115;
+              "
             ></div>
           </div>
         </div>
+      </section>
 
-        <!-- Activity Recommendations -->
-        <div class="bento-card col-span-12 md:col-span-7 flex flex-col">
-          <h3 class="text-gray-400 font-medium mb-4 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-blue-400"></span> Rekomendasi
-            Aktivitas (AI)
-          </h3>
-          <div
-            id="activityList"
-            class="grid grid-cols-1 md:grid-cols-3 gap-3 h-full"
-          >
-            <!-- Activities will be injected here -->
+      <!-- VIEW: DISASTER -->
+      <section id="view-disaster" class="page-view hidden relative z-10">
+        <div class="bento-grid">
+          <!-- HEADER -->
+          <div class="bento-card col-span-12">
+            <h1 class="text-3xl font-bold mb-2 text-red-400">
+              Pusat Peringatan Dini
+            </h1>
+            <p class="text-muted">
+              Analisis risiko bencana meteorologi berbasis AI untuk 7 hari
+              kedepan.
+            </p>
+          </div>
+
+          <!-- RISK MATRIX TABLE -->
+          <div class="bento-card col-span-12 lg:col-span-8 overflow-x-auto">
+            <div class="flex-between mb-6">
+              <h3 class="value-lg">Matriks Risiko Mingguan</h3>
+              <div class="flex gap-4 text-xs">
+                <div class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-green-500"></span> Aman
+                  (<30%)
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                  Waspada (30-70%)
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-red-500"></span> Bahaya
+                  (>70%)
+                </div>
+              </div>
+            </div>
+
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="text-gray-400 border-b border-white/10">
+                  <th class="p-3 text-left">Hari/Tanggal</th>
+                  <th class="p-3">Banjir 🌊</th>
+                  <th class="p-3">Badai 🌪️</th>
+                  <th class="p-3">Gelombang Panas 🥵</th>
+                </tr>
+              </thead>
+              <tbody id="riskMatrixBody">
+                <!-- JS will populate -->
+                <tr>
+                  <td colspan="4" class="p-8 text-center text-gray-500">
+                    Memuat analisis risiko...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- CURRENT STATUS & TIPS -->
+          <div class="bento-card col-span-12 lg:col-span-4 flex flex-col gap-4">
             <div
-              class="col-span-3 text-center text-gray-500 italic p-4 flex items-center justify-center"
+              class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl"
+              id="mainStatusCard"
             >
-              Menunggu analisis AI...
+              <h3 class="text-red-400 font-bold mb-1">Status Keamanan</h3>
+              <div class="text-4xl font-bold mb-2" id="safetyStatus">
+                Normal
+              </div>
+              <p class="text-xs text-gray-400" id="safetyMessage">
+                Tidak ada ancaman bencana signifikan terdeteksi saat ini.
+              </p>
+            </div>
+
+            <div
+              class="flex-1 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl"
+            >
+              <h3 class="text-blue-500 dark:text-blue-400 font-bold mb-3">
+                Panduan Keselamatan
+              </h3>
+              <ul
+                class="text-sm space-y-2 text-gray-700 dark:text-gray-300 list-disc pl-4 mb-4"
+                id="safetyTips"
+              >
+                <li>Pantau terus perkembangan cuaca melalui sumber resmi.</li>
+                <li>
+                  Siapkan tas siaga (obat, dokumen, senter) jika di zona rawan.
+                </li>
+                <li>
+                  Hindari berteduh di bawah pohon saat badai angin kencang.
+                </li>
+                <li>Cabut peralatan elektronik saat terjadi petir hebat.</li>
+              </ul>
+
+              <h4
+                class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 border-t border-gray-200 dark:border-white/10 pt-3"
+              >
+                Nomor Darurat Penting
+              </h4>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >BNPB</span
+                  >
+                  <span class="font-mono text-red-500">117</span>
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >BASARNAS</span
+                  >
+                  <span class="font-mono text-orange-500">115</span>
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >Polisi</span
+                  >
+                  <span class="font-mono text-blue-500">110</span>
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >Ambulans</span
+                  >
+                  <span class="font-mono text-green-500">118</span>
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >PLN</span
+                  >
+                  <span class="font-mono text-yellow-500">123</span>
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 bg-white dark:bg-white/5 rounded border border-gray-200 dark:border-white/5"
+                >
+                  <span class="font-bold text-gray-700 dark:text-gray-300"
+                    >Damkar</span
+                  >
+                  <span class="font-mono text-red-600">113</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- STATS ROW -->
-        <!-- STATS ROW -->
-        <div class="bento-card col-span-3 relative">
-          <div>
-            <span class="label-sm">Kelembaban</span>
-            <div id="humidity" class="value-lg">65%</div>
-          </div>
-          <div class="icon-box text-accent absolute top-4 right-4">💧</div>
-        </div>
-
-        <div class="bento-card col-span-3 relative">
-          <div>
-            <span class="label-sm">Angin</span>
-            <div id="windSpeed" class="value-lg">12 km/h</div>
-          </div>
-          <div class="icon-box text-accent absolute top-4 right-4">💨</div>
-        </div>
-
-        <div class="bento-card col-span-3 relative">
-          <div>
-            <span class="label-sm">Tekanan</span>
-            <div id="pressure" class="value-lg">1012 hPa</div>
-          </div>
-          <div class="icon-box text-accent absolute top-4 right-4">⏲️</div>
-        </div>
-
-        <div class="bento-card col-span-3 relative">
-          <div>
-            <span class="label-sm">UV Index</span>
-            <div id="uvIndex" class="value-lg">High</div>
-          </div>
-          <div class="icon-box text-accent absolute top-4 right-4">☀️</div>
-        </div>
-
-        <!-- ACTION LINKS -->
-        <!-- ACTION LINKS -->
-        <a
-          href="/forecast.html"
-          class="bento-card col-span-6 group cursor-pointer hover:border-accent-primary/50 transition-colors"
-        >
-          <div class="flex-between">
-            <span class="label-sm group-hover:text-accent transition-colors"
-              >7-Day Forecast</span
-            >
-            <svg
-              class="w-6 h-6 text-muted group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              ></path>
-            </svg>
-          </div>
-          <h3
-            class="text-xl mt-4 font-bold group-hover:text-accent transition-colors"
+          <!-- RISK MAP VISUALIZATION -->
+          <div
+            class="bento-card col-span-12 min-h-[400px] p-0 overflow-hidden relative"
           >
-            Lihat Prediksi
-          </h3>
-          <p class="text-sm text-dim mt-1">Analisis tren cuaca lengkap.</p>
-        </a>
-
-        <a
-          href="/heatmap.html"
-          class="bento-card col-span-6 group cursor-pointer hover:border-accent-primary/50 transition-colors"
-        >
-          <div class="flex-between">
-            <span class="label-sm group-hover:text-accent transition-colors"
-              >Interactive Map</span
+            <div
+              class="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur px-3 py-1 rounded text-xs font-bold"
             >
-            <svg
-              class="w-6 h-6 text-muted group-hover:translate-x-1 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              ></path>
-            </svg>
+              Peta Potensi Dampak
+            </div>
+            <div id="disasterMap" class="w-full h-full bg-[#15171B]"></div>
           </div>
-          <h3
-            class="text-xl mt-4 font-bold group-hover:text-accent transition-colors"
-          >
-            Buka Peta Panas
-          </h3>
-          <p class="text-sm text-dim mt-1">
-            Visualisasi zona panas interaktif.
-          </p>
-        </a>
-      </div>
+        </div>
+      </section>
 
       <!-- FOOTER -->
       <footer class="site-footer">
@@ -318,5 +630,72 @@
     <script type="module" src="js/suhAI-app.js"></script>
     <script type="module" src="js/suhAI-backend.js"></script>
     <script type="module" src="js/suhAI-search.js"></script>
+    <script type="module" src="js/suhAI-heatmap.js"></script>
+
+    <!-- SPA Navigation Logic -->
+    <script>
+      function switchPage(event, viewId) {
+        if (event) event.preventDefault();
+
+        // 1. Hide all Views
+        document.querySelectorAll(".page-view").forEach((el) => {
+          el.classList.add("hidden");
+        });
+
+        // 2. Show Active View
+        const activeView = document.getElementById(viewId);
+        if (activeView) {
+          activeView.classList.remove("hidden");
+        }
+
+        // 3. Update Active Link State
+        document.querySelectorAll(".nav-link").forEach((link) => {
+          link.classList.remove("active");
+          // Match based on onclick attribute or simple heuristic
+          const onclickVal = link.getAttribute("onclick");
+          if (onclickVal && onclickVal.includes(viewId)) {
+            link.classList.add("active");
+          }
+        });
+
+        // 4. Update URL Hash
+        const hash = viewId.replace("view-", "");
+        if (hash === "dashboard") {
+          history.replaceState(null, null, " ");
+        } else {
+          history.replaceState(null, null, "#" + hash);
+        }
+
+        // 5. Handle Leaflet Search & Resize triggers
+        if (viewId === "view-heatmap") {
+          setTimeout(() => {
+            if (window.HeatmapApp && window.HeatmapApp.map) {
+              window.HeatmapApp.map.invalidateSize();
+            }
+          }, 100);
+        }
+        if (viewId === "view-disaster") {
+          setTimeout(() => {
+            if (window.WeatherApp && window.WeatherApp.disasterMapInstance) {
+              window.WeatherApp.disasterMapInstance.invalidateSize();
+            }
+          }, 100);
+        }
+      }
+
+      // Handle Hash on Load
+      document.addEventListener("DOMContentLoaded", () => {
+        const hash = window.location.hash.replace("#", "");
+        if (hash) {
+          const viewId = "view-" + hash;
+          if (document.getElementById(viewId)) {
+            switchPage(null, viewId);
+            return;
+          }
+        }
+        // Default
+        switchPage(null, "view-dashboard");
+      });
+    </script>
   </body>
 </html>

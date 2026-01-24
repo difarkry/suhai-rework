@@ -11,8 +11,35 @@ const ChatApp = {
     this.listenForWeatherUpdates();
     this.setupQuickPrompts();
     this.setupSearch();
+    this.setupMenu(); // Premium Menu Logic
     this.setupEmojiPicker();
     this.updateContextDisplay();
+
+    // Features State
+    this.isTTSActive = false;
+    this.isTextOnly = false;
+    this.personas = [
+      { id: "default", name: "Default", prompt: "" },
+      {
+        id: "casual",
+        name: "Santai",
+        prompt:
+          "Gaya bicara: Santai, akrab, gunakan bahasa gaul sopan, dan banyak emoji.",
+      },
+      {
+        id: "formal",
+        name: "Formal",
+        prompt:
+          "Gaya bicara: Sangat formal, profesional, gunakan istilah teknis meteorologi.",
+      },
+      {
+        id: "pantun",
+        name: "Pantun",
+        prompt:
+          "Gaya bicara: Selalu awali atau akhiri jawaban dengan pantun cuaca yang relevan.",
+      },
+    ];
+    this.currentPersonaIndex = 0;
   },
 
   setupEmojiPicker() {
@@ -200,11 +227,13 @@ const ChatApp = {
     // Toggle Logic
     const togglePicker = (show) => {
       if (show) {
-        // EXCLUSIVE: Close Search if open
+        // EXCLUSIVE: Close Search & Menu if open
         if (this.sidebar.classList.contains("open")) {
-          this.sidebar.classList.remove("open");
-          document.removeEventListener("click", this.handleOutsideClick);
+          this.toggleSidebarRef
+            ? this.toggleSidebarRef(false)
+            : this.sidebar.classList.remove("open");
         }
+        if (this.toggleMenuRef) this.toggleMenuRef(false);
 
         this.emojiPicker.classList.remove("hidden");
         requestAnimationFrame(() => {
@@ -302,8 +331,15 @@ const ChatApp = {
 
     if (this.btnSearch) {
       this.btnSearch.addEventListener("click", (e) => {
-        e.stopPropagation(); // Prevent immediate triggering of document listener
+        e.stopPropagation();
         const isOpen = this.sidebar.classList.contains("open");
+
+        // Exclusive: Close Menu & Emoji if opening Search
+        if (!isOpen) {
+          if (this.toggleMenuRef) this.toggleMenuRef(false);
+          if (this.emojiPicker) this.emojiPicker.classList.add("hidden");
+        }
+
         toggleSidebar(!isOpen);
       });
     }
@@ -333,6 +369,224 @@ const ChatApp = {
         }, 300); // 300ms debounce
       });
     }
+  },
+
+  setupMenu() {
+    this.btnMenu = document.getElementById("btnMenu");
+    this.menuDropdown = document.getElementById("menuDropdown");
+
+    // Feature Elements
+    this.menuAbout = document.getElementById("menuAbout");
+    this.menuHelp = document.getElementById("menuHelp");
+    this.menuPersona = document.getElementById("menuPersona");
+    this.menuTTSToggle = document.getElementById("menuTTSToggle");
+    this.toggleTTS = document.getElementById("toggleTTS");
+    this.menuTextOnlyToggle = document.getElementById("menuTextOnlyToggle");
+    this.toggleTextOnly = document.getElementById("toggleTextOnly");
+    this.menuReport = document.getElementById("menuReport");
+    this.menuDailyBrief = document.getElementById("menuDailyBrief");
+    this.menuRainMonitor = document.getElementById("menuRainMonitor");
+    this.currentPersonaBadge = document.getElementById("currentPersonaBadge");
+
+    // Toggle Menu Visibility
+    const toggleMenu = (show) => {
+      // Expose to instance for other components
+      this.toggleMenuRef = toggleMenu;
+
+      if (show) {
+        // Exclusive: Close Sidebar & Emoji
+        if (this.sidebar.classList.contains("open"))
+          this.toggleSidebarRef
+            ? this.toggleSidebarRef(false)
+            : this.sidebar.classList.remove("open");
+        if (this.emojiPicker && !this.emojiPicker.classList.contains("hidden"))
+          this.emojiPicker.classList.add("hidden");
+
+        this.menuDropdown.classList.remove("hidden");
+        // Force Reflow
+        void this.menuDropdown.offsetWidth;
+
+        this.menuDropdown.classList.remove("closing");
+        this.menuDropdown.classList.add("open");
+
+        document.addEventListener("click", this.handleOutsideMenuClick);
+      } else {
+        this.menuDropdown.classList.remove("open");
+        this.menuDropdown.classList.add("closing");
+
+        // Wait for animation
+        setTimeout(() => {
+          if (this.menuDropdown.classList.contains("closing")) {
+            this.menuDropdown.classList.add("hidden");
+            this.menuDropdown.classList.remove("closing");
+          }
+        }, 200); // match css duration
+        document.removeEventListener("click", this.handleOutsideMenuClick);
+      }
+    };
+    this.toggleMenuRef = toggleMenu; // Initial binding
+
+    if (this.btnMenu) {
+      this.btnMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = this.menuDropdown.classList.contains("open");
+        toggleMenu(!isOpen);
+      });
+    }
+
+    this.handleOutsideMenuClick = (e) => {
+      if (
+        this.menuDropdown &&
+        !this.menuDropdown.contains(e.target) &&
+        !this.btnMenu.contains(e.target)
+      ) {
+        toggleMenu(false);
+      }
+    };
+
+    // 1. Tentang Weathera
+    if (this.menuAbout) {
+      this.menuAbout.addEventListener("click", () => {
+        this.toggleModal("modalAbout_v2", true);
+        toggleMenu(false);
+      });
+    }
+
+    // 2. Bantuan
+    if (this.menuHelp) {
+      this.menuHelp.addEventListener("click", () => {
+        this.toggleModal("modalHelp", true);
+        toggleMenu(false);
+      });
+    }
+
+    // 3. Ganti Gaya Bahasa (Cycle)
+    if (this.menuPersona) {
+      this.menuPersona.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.currentPersonaIndex =
+          (this.currentPersonaIndex + 1) % this.personas.length;
+        const p = this.personas[this.currentPersonaIndex];
+        if (this.currentPersonaBadge) {
+          this.currentPersonaBadge.textContent = p.name;
+          this.currentPersonaBadge.classList.add("animate-pulse");
+          setTimeout(
+            () => this.currentPersonaBadge.classList.remove("animate-pulse"),
+            500,
+          );
+        }
+      });
+    }
+
+    // 4. Baca Suara (Toggle)
+    if (this.menuTTSToggle) {
+      this.menuTTSToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.isTTSActive = !this.isTTSActive;
+
+        // New Robust Logic: Toggle .active-green on the switch
+        if (this.isTTSActive) {
+          this.toggleTTS.classList.add("active-green");
+          this.speakText("Fitur baca suara diaktifkan.");
+        } else {
+          this.toggleTTS.classList.remove("active-green");
+          window.speechSynthesis.cancel();
+        }
+      });
+    }
+
+    // 5. Mode Teks Saja
+    if (this.menuTextOnlyToggle) {
+      this.menuTextOnlyToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.isTextOnly = !this.isTextOnly;
+
+        // New Robust Logic: Toggle .active-blue on the switch
+        if (this.isTextOnly) {
+          this.toggleTextOnly.classList.add("active-blue");
+          this.historyContainer.classList.add("text-only-mode");
+        } else {
+          this.toggleTextOnly.classList.remove("active-blue");
+          this.historyContainer.classList.remove("text-only-mode");
+        }
+      });
+    }
+
+    // 6. Laporan Jawaban
+    if (this.menuReport) {
+      this.menuReport.addEventListener("click", () => {
+        // Mock Report
+        this.showToast("Laporan jawaban terkirim. Terima kasih!");
+        toggleMenu(false);
+      });
+    }
+
+    // 7. Ringkasan Harian
+    if (this.menuDailyBrief) {
+      this.menuDailyBrief.addEventListener("click", () => {
+        this.handleUserMessage(
+          "Berikan ringkasan cuaca harian untuk hari ini secara lengkap.",
+        );
+        toggleMenu(false);
+      });
+    }
+
+    // 8. Monitor Hujan
+    if (this.menuRainMonitor) {
+      this.menuRainMonitor.addEventListener("click", () => {
+        this.handleUserMessage(
+          "Pantau kondisi hujan saat ini dan potensi 3 jam ke depan.",
+        );
+        toggleMenu(false);
+      });
+    }
+
+    // Modal Close Logic
+    document.querySelectorAll(".btn-close-modal").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const modal = btn.closest(".fixed");
+        if (modal) this.toggleModal(modal.id, false);
+      });
+    });
+  },
+
+  toggleModal(id, show) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (show) {
+      el.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        el.classList.remove("opacity-0");
+        el.firstElementChild.classList.remove("scale-95");
+      });
+    } else {
+      el.classList.add("opacity-0");
+      el.firstElementChild.classList.add("scale-95");
+      setTimeout(() => el.classList.add("hidden"), 300);
+    }
+  },
+
+  showToast(msg) {
+    let toast = document.getElementById("app-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "app-toast";
+      toast.className =
+        "fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-900 border border-white/10 text-white px-4 py-2 rounded-lg shadow-xl z-50 text-sm opacity-0 transition-opacity duration-300 pointer-events-none";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.remove("opacity-0");
+    setTimeout(() => toast.classList.add("opacity-0"), 3000);
+  },
+
+  speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "id-ID";
+    utterance.rate = 1.0;
+    window.speechSynthesis.speak(utterance);
   },
 
   performSearch(query) {
@@ -585,8 +839,10 @@ const ChatApp = {
             feelsLike: current.feelsLike,
             forecast: forecast ? forecast.slice(0, 3) : [],
             disaster: WeatherData.disaster || null,
+            disaster: WeatherData.disaster || null,
             systemInstruction:
-              "Jika risiko bencana tinggi (>70%), gunakan kata 'Waspada' dan jelaskan risikonya (misal: 'Waspada banjir'). JANGAN gunakan kata 'Tidak Aman'. Berikan saran keselamatan yang relevan.",
+              (this.personas[this.currentPersonaIndex].prompt || "") +
+              "\n\nJika risiko bencana tinggi (>70%), gunakan kata 'Waspada'.",
           },
         }),
       });
@@ -600,6 +856,13 @@ const ChatApp = {
           .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
           .replace(/\n/g, "<br>");
         this.addMessage(formattedReply, "ai");
+
+        // Auto-Speak if enabled
+        if (this.isTTSActive) {
+          // Strip HTML tags for cleaner speech
+          const cleanText = data.reply.replace(/<[^>]*>?/gm, "");
+          this.speakText(cleanText);
+        }
       } else if (data.error) {
         // Display specific error from server (e.g. Rate Limit)
         this.addMessage(`⚠️ ${data.error}`, "ai");
